@@ -434,6 +434,13 @@ export default function HlLeadJourneyPage() {
     </div>
   );
 
+  const handleDemoUpload = (key: string, label: string) => {
+    const demoName = label.replace(/[^a-zA-Z0-9]/g, "_").replace(/_+$/, "");
+    setUploadedDocs((prev) => ({ ...prev, [key]: { name: `${demoName}_demo.pdf`, size: "142.5 KB" } }));
+    setS4Errors((e) => ({ ...e, [key]: "" }));
+    toast({ title: "Demo Document Loaded", description: `${label} loaded with demo file.` });
+  };
+
   // ─── File Upload Widget ───────────────────────────────────────────────────
   const FileUpload = ({ docKey, label }: { docKey: string; label: string }) => {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -466,6 +473,24 @@ export default function HlLeadJourneyPage() {
           )}
         </div>
         <input ref={inputRef} type="file" accept="application/pdf" className="hidden" onChange={(e) => handleFileUpload(docKey, e.target.files?.[0] || null)} />
+        {!doc && (
+          <button
+            type="button"
+            onClick={() => handleDemoUpload(docKey, label.replace(" *", ""))}
+            className="text-xs font-bold text-amber-600 hover:text-amber-700 underline underline-offset-2 flex items-center gap-1 mt-1 transition-colors"
+          >
+            <FileText className="h-3 w-3" /> Use Demo File (UAT only)
+          </button>
+        )}
+        {doc && (
+          <button
+            type="button"
+            onClick={() => setUploadedDocs((prev) => { const n = { ...prev }; delete n[docKey]; return n; })}
+            className="text-xs font-bold text-rose-400 hover:text-rose-600 underline underline-offset-2 flex items-center gap-1 mt-1 transition-colors"
+          >
+            <XCircle className="h-3 w-3" /> Remove
+          </button>
+        )}
         <FieldError msg={s4Errors[docKey]} />
       </div>
     );
