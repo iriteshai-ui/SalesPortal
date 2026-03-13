@@ -110,11 +110,11 @@ export default function HlLeadJourneyPage() {
   };
 
   // ─── Stage 1: Login / OTP ───────────────────────────────────────────────
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("ananya.mehta@gmail.com");
   const [emailError, setEmailError] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
+  const [otpSent, setOtpSent] = useState(true);
   const [sendingOtp, setSendingOtp] = useState(false);
-  const [otp, setOtp] = useState("");
+  const [otp, setOtp] = useState("123456");
   const [otpError, setOtpError] = useState("");
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [otpRetries, setOtpRetries] = useState(0);
@@ -285,14 +285,14 @@ export default function HlLeadJourneyPage() {
 
   // ─── Stage 3: Hospital Details ───────────────────────────────────────────
   const [s3, setS3] = useState({
-    hospitalCode: "",
-    hospitalName: "",
-    hospitalLocation: "",
-    hospitalPincode: "",
-    hospitalTier: "",
-    financeType: "",
-    treatmentType: "",
-    treatmentCost: "",
+    hospitalCode: "HSP005",
+    hospitalName: "Kokilaben Ambani",
+    hospitalLocation: "Rao Saheb Patwardhan Marg, Mumbai",
+    hospitalPincode: "400053",
+    hospitalTier: "1",
+    financeType: "Patient Finance",
+    treatmentType: "Cardiac Surgery",
+    treatmentCost: "350000.00",
   });
   const [s3Errors, setS3Errors] = useState<Record<string, string>>({});
   const [journeyLink, setJourneyLink] = useState("");
@@ -366,8 +366,8 @@ export default function HlLeadJourneyPage() {
   const kycLink = `https://kyc.nbfc.com/verify?ref=KYC${Date.now()}&email=${encodeURIComponent(email)}`;
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, { name: string; size: string }>>({});
   const [s4Errors, setS4Errors] = useState<Record<string, string>>({});
-  const [invoiceAmount, setInvoiceAmount] = useState("");
-  const [insuranceAmount, setInsuranceAmount] = useState("");
+  const [invoiceAmount, setInvoiceAmount] = useState("350000");
+  const [insuranceAmount, setInsuranceAmount] = useState("75000");
 
   const handleFileUpload = (key: string, file: File | null) => {
     if (!file) return;
