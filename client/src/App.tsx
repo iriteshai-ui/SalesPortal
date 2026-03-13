@@ -12,6 +12,7 @@ import DashboardPage from "@/pages/dashboard";
 import LeadJourneyPage from "@/pages/lead-journey";
 import PlLeadJourneyPage from "@/pages/pl-lead-journey";
 import ElLeadJourneyPage from "@/pages/el-lead-journey";
+import HlLeadJourneyPage from "@/pages/hl-lead-journey";
 import NotFound from "@/pages/not-found";
 
 // Protected Route Wrapper
@@ -59,6 +60,12 @@ function Router() {
       <Route path="/leads/el/new">
         <ProtectedRoute>
           <ElLeadJourneyPage />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/leads/hl/new">
+        <ProtectedRoute>
+          <HlLeadJourneyPage />
         </ProtectedRoute>
       </Route>
 

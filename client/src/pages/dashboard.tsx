@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MOCK_LEADS } from "@/lib/mock-data";
-import { PlusCircle, Search, Filter, Smartphone, ChevronRight, Link as LinkIcon, Mail, Copy, Plus, Trash2, CheckCircle2, Briefcase, User as UserIcon, GraduationCap } from "lucide-react";
+import { PlusCircle, Search, Filter, Smartphone, ChevronRight, Link as LinkIcon, Mail, Copy, Plus, Trash2, CheckCircle2, Briefcase, User as UserIcon, GraduationCap, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -68,11 +68,12 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <Tabs defaultValue="leads" className="w-full">
-        <TabsList className="grid w-full max-w-2xl grid-cols-5 mb-8 bg-slate-100 p-1">
+        <TabsList className="grid w-full max-w-3xl grid-cols-6 mb-8 bg-slate-100 p-1">
           <TabsTrigger value="leads" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">Lead Dashboard</TabsTrigger>
           <TabsTrigger value="create-bl" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">BL Lead</TabsTrigger>
           <TabsTrigger value="create-pl" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">PL Lead</TabsTrigger>
           <TabsTrigger value="create-el" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">EL Lead</TabsTrigger>
+          <TabsTrigger value="create-hl" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">HL Lead</TabsTrigger>
           <TabsTrigger value="utm" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">Link Generation</TabsTrigger>
         </TabsList>
 
@@ -232,6 +233,23 @@ export default function DashboardPage() {
              <Link href="/leads/el/new">
                 <Button className="bg-[#004499] hover:bg-[#003377] h-14 px-12 text-lg font-black uppercase tracking-widest shadow-xl shadow-blue-100">
                    Launch EL Wizard
+                </Button>
+             </Link>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="create-hl" className="mt-0">
+          <div className="max-w-4xl mx-auto py-12 text-center space-y-6 animate-in fade-in zoom-in-95">
+             <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center mx-auto border border-rose-100">
+                <Heart className="text-rose-500 h-10 w-10" />
+             </div>
+             <div className="space-y-2">
+                <h2 className="text-3xl font-black text-slate-900">Health Prime Lead</h2>
+                <p className="text-slate-500 font-medium">Initiate a new healthcare finance journey.</p>
+             </div>
+             <Link href="/leads/hl/new">
+                <Button className="bg-[#004499] hover:bg-[#003377] h-14 px-12 text-lg font-black uppercase tracking-widest shadow-xl shadow-blue-100">
+                   Launch HL Wizard
                 </Button>
              </Link>
           </div>

@@ -31,10 +31,11 @@ script/          - Build scripts
 ```
 
 ## Features
-- **Dashboard**: Lead overview with tabs for BL Lead, PL Lead, EL Lead, and Link Generation
+- **Dashboard**: Lead overview with tabs for BL Lead, PL Lead, EL Lead, HL Lead, and Link Generation
 - **BL Lead Journey**: Business loan wizard (5 stages)
 - **PL Lead Journey**: Personal loan wizard (4 stages)
 - **EL Lead Journey**: Education loan wizard (4 stages: Student Basic Details, Academic Info, Co-Applicant Onboarding, Bank Connect)
+- **HL Lead Journey** (Health Prime Lead): Healthcare finance wizard (4 stages: Email+OTP Login, Basic Details, Hospital Details with Journey Link generation, KYC & Document Upload)
 - **Link Generation**: UTM link builder
 
 ## Key Commands
