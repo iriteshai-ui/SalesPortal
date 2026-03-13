@@ -1,0 +1,255 @@
+Got it. I’ll **rewrite the requirement cleanly, crisply, and professionally**, the way it should be given to an **AI agent working for a top-tier NBFC**.
+This version is **clear, unambiguous, implementation-ready**, and aligned with **bank-grade expectations**.
+
+You can copy-paste this directly.
+
+---
+
+# **Requirement Brief: Sales Login Portal UI – NBFC**
+
+## Context & Objective
+
+Design a **Sales Login Portal UI** for a **leading NBFC** that enables the **sales team to complete the pre-offer journey on behalf of customers**, while the **customer completes the post-offer journey via an SMS link**.
+
+The objective of this portal is to:
+
+* Reduce customer effort
+* Improve lead-to-offer conversion
+* Enable faster turnaround time
+* Maintain compliance, auditability, and data security
+
+The portal will be used by:
+
+* Sales Officers
+* DSAs
+* Team Leaders
+* Reporting Managers
+* Team Heads
+
+The UI must feel **trustworthy, secure, professional, calm, and optimized for speed and accuracy**.
+Avoid flashy visuals. Focus on clarity, hierarchy, and confidence suitable for a regulated NBFC environment.
+
+---
+
+## Overall Journey Structure
+
+The system supports **four major stages**:
+
+1. Login (SSO)
+2. Dashboard & Lead Management
+3. Lead Creation & Pre-Offer Data Capture (Sales-assisted)
+4. Offer Check & Conditional BRP Redirection
+
+Sales agents perform actions **on behalf of the customer** wherever applicable.
+
+---
+
+## 1. LOGIN – SALES LOGIN PORTAL
+
+### Purpose
+
+Allow authorized sales users to securely log in using **SSO-based authentication**.
+
+### Requirements
+
+* Login via **ADID (Email ID + Password)**
+* SSO-backed authentication
+* Role validation at login
+* Unauthorized users must not gain access
+* Login activity must be audit logged
+
+### UI Expectations
+
+* Enterprise-grade, trust-building login screen
+* Center-aligned login card
+* Clean white/light neutral background
+* Subtle NBFC brand colors (blue/grey tones)
+* Minimal elements, no illustrations or gradients
+
+---
+
+## 2. DASHBOARD – LEAD MANAGEMENT
+
+### Purpose
+
+Provide sales users immediate visibility into their leads and allow controlled actions.
+
+### Dashboard Rules
+
+* Leads displayed must be **read-only** (not editable)
+* Visibility is **role-based**
+* Hierarchical access applies automatically
+
+### Lead Table (Tabular Format)
+
+Fields to be displayed:
+
+* Lead Name
+* Mobile Number
+* PAN Number
+* Stage
+* Sub-stage
+* Send Link (CTA)
+
+### Dashboard Actions
+
+* **Create Lead** (Primary CTA)
+* **Send Link** (SMS link to customer for post-offer journey)
+
+---
+
+## 3. LEAD CREATION & PRE-OFFER DATA CAPTURE
+
+### Trigger
+
+On clicking **Create Lead**, the system opens the **Basic Details** screen.
+
+### 3.1 Basic Details (Sales-Filled on Behalf of Customer)
+
+Fields:
+
+* PAN Number
+* Name
+* Date of Birth
+* Gender
+* Email ID
+* Nature of Business
+* Address
+* Address Line 1
+* Address Line 2
+* Pin Code
+
+### Rules
+
+* PAN validation is mandatory
+* All data entry actions must be audit logged
+* Clearly indicate that details are captured by the sales agent on behalf of the customer
+
+---
+
+## 3.2 Customer Consent (CIBIL)
+
+### Purpose
+
+Obtain customer consent to fetch **CIBIL score**.
+
+### Flow
+
+* Sales agent triggers consent request
+* Consent is sent to the customer via SMS
+* Customer action is mandatory
+
+### Outcomes
+
+* **Consent Approved** → Journey continues
+* **Consent Rejected** → Journey stops
+
+Consent details must be stored with:
+
+* Timestamp
+* Lead ID
+* Channel
+
+---
+
+## 3.3 Business Details – GST & UDYAM
+
+### Purpose
+
+Capture business identifiers fetched using PAN.
+
+### GST Selection (If Multiple Found)
+
+Display GST table with:
+
+* Sr. No.
+* GSTIN Number
+* Date of Incorporation
+
+Sales agent selects applicable GST.
+
+### UDYAM Selection (If Multiple Found)
+
+Display UDYAM table with:
+
+* Sr. No.
+* UDYAM Number
+* Date of Incorporation
+
+Sales agent selects applicable UDYAM.
+
+### Testing Requirement
+
+Provide **dummy buttons** to simulate:
+
+* Multiple GST scenario
+* Multiple UDYAM scenario
+
+(For testing and demo only)
+
+---
+
+## 4. OFFER CHECK & OFFER DISPLAY
+
+### Offer Check
+
+* Triggered after GST/UDYAM selection
+* Eligibility determined based on **CIBIL score**
+
+### Offer Screen
+
+* Display approved loan amount
+* Visually clear, official, NBFC-grade presentation
+
+### CTAs
+
+* **Want More** (shown only if GST exists for the PAN)
+
+---
+
+## 5. BRP REDIRECTION (CONDITIONAL)
+
+### Flow
+
+* On clicking **Want More**, a new journey link is generated
+* User is redirected to the **BRP screen**
+
+### Rule
+
+* BRP screen must be shown **only if BRE Flag = YES**
+* If BRE Flag ≠ YES, BRP option must not be available
+
+---
+
+## Key Business & Compliance Principles
+
+* All “on behalf of customer” actions must be clearly indicated
+* Every critical action must be audit logged
+* Role-based access control is mandatory
+* UI must reflect real operational usage in an NBFC environment
+* Design must be production-ready, not conceptual
+
+---
+
+## Expected Output from AI Agent
+
+* Login screen UI
+* Dashboard with read-only lead table
+* Lead creation & basic details screens
+* Consent flow screens
+* GST & UDYAM selection screens
+* Offer screen with conditional BRP redirection
+* Role-based UI behavior
+
+The final solution must be **ready for enterprise deployment in a regulated NBFC setup**.
+
+---
+
+If you want, next I can:
+
+* Tighten this further into a **one-page executive brief**
+* Convert it into **user stories + acceptance criteria**
+* Align it with **RBI / compliance language**
+* Rewrite it specifically for **Figma / UI-gen AI tools**
+
+Just tell me how your AI agent consumes inputs.
