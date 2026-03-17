@@ -1,4 +1,4 @@
-import { useAuth } from "@/context/auth-context";
+import { useAuth, type User } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { 
   LogOut, 
@@ -66,8 +66,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 mt-2 shadow-xl border-slate-200">
-                <DropdownMenuLabel className="text-slate-500 font-normal">Account Management</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-64 mt-2 shadow-xl border-slate-200">
+                <DropdownMenuLabel className="pb-2">
+                  <p className="text-sm font-bold text-slate-900">{user?.name}</p>
+                  <p className="text-[10px] text-slate-500 font-normal mt-0.5">{user?.email}</p>
+                  {user?.employeeId && (
+                    <p className="text-[10px] text-slate-400 font-mono mt-0.5">{user.employeeId}</p>
+                  )}
+                  {user?.branch && (
+                    <p className="text-[10px] text-slate-400 mt-0.5">{user.branch}</p>
+                  )}
+                  {user?.designation && (
+                    <p className="text-[10px] text-[#004499] font-semibold mt-0.5">{user.designation}</p>
+                  )}
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout} className="text-rose-600 cursor-pointer focus:bg-rose-50 focus:text-rose-700 font-medium">
                   <LogOut className="mr-2 h-4 w-4" />

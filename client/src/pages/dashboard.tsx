@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/auth-context";
 import {
   Table,
   TableBody,
@@ -21,6 +22,15 @@ import {
 export default function DashboardPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const userProducts = user?.products ?? [];
+  const hasBL = userProducts.includes("BL");
+  const hasPL = userProducts.includes("PL");
+  const hasEL = userProducts.includes("EL");
+  const hasHL = userProducts.includes("HL");
+  // tab count: Lead Dashboard + active products + Link Generation
+  const tabCount = 2 + [hasBL, hasPL, hasEL, hasHL].filter(Boolean).length;
+  const gridCols = tabCount <= 3 ? `grid-cols-${tabCount}` : tabCount === 4 ? "grid-cols-4" : tabCount === 5 ? "grid-cols-5" : "grid-cols-6";
   const [baseUrl, setBaseUrl] = useState("test.com");
   const [utmMedium, setUtmMedium] = useState("google");
   const [dsaCode, setDsaCode] = useState("123");
@@ -68,12 +78,12 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <Tabs defaultValue="leads" className="w-full">
-        <TabsList className="grid w-full max-w-3xl grid-cols-6 mb-8 bg-slate-100 p-1">
+        <TabsList className={`grid w-full max-w-3xl ${gridCols} mb-8 bg-slate-100 p-1`}>
           <TabsTrigger value="leads" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">Lead Dashboard</TabsTrigger>
-          <TabsTrigger value="create-bl" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">BL Lead</TabsTrigger>
-          <TabsTrigger value="create-pl" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">PL Lead</TabsTrigger>
-          <TabsTrigger value="create-el" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">EL Lead</TabsTrigger>
-          <TabsTrigger value="create-hl" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">HL Lead</TabsTrigger>
+          {hasBL && <TabsTrigger value="create-bl" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">BL Lead</TabsTrigger>}
+          {hasPL && <TabsTrigger value="create-pl" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">PL Lead</TabsTrigger>}
+          {hasEL && <TabsTrigger value="create-el" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">EL Lead</TabsTrigger>}
+          {hasHL && <TabsTrigger value="create-hl" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">HL Lead</TabsTrigger>}
           <TabsTrigger value="utm" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold uppercase tracking-wider">Link Generation</TabsTrigger>
         </TabsList>
 
