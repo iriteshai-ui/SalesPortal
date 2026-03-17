@@ -142,6 +142,38 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* ── Quick Test Account Selector ── */}
+            <div className="mb-5 space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                <Zap className="h-3 w-3 text-amber-500" /> Quick Test Login
+              </Label>
+              <select
+                className="w-full h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 focus:outline-none focus:border-[#004499] focus:ring-2 focus:ring-[#004499]/10 transition-all cursor-pointer"
+                defaultValue=""
+                onChange={(e) => {
+                  const found = MOCK_USERS.find((u) => u.id === e.target.value);
+                  if (found) quickLogin(found);
+                  e.target.value = "";
+                }}
+              >
+                <option value="" disabled>Select a test account…</option>
+                {MOCK_USERS.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} — {u.role} ({u.products.length === 4 ? "All Products" : u.products.join(", ")})
+                  </option>
+                ))}
+              </select>
+              <p className="text-[10px] text-slate-400">Selecting an account auto-fills the credentials below.</p>
+            </div>
+            <div className="relative mb-5">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative flex justify-center text-[10px] uppercase tracking-widest">
+                <span className="bg-white px-3 text-slate-400 font-bold">or enter manually</span>
+              </div>
+            </div>
+
             <form onSubmit={handleLogin} className="space-y-4">
               {loginError && (
                 <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5 text-sm text-red-600">
