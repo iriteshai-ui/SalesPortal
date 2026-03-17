@@ -75,7 +75,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </div>
                   <div className="hidden sm:block text-left">
                     <p className="text-sm font-semibold text-slate-900 leading-none">{user?.name || "User"}</p>
-                    <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-wider font-bold">{user?.role || "Sales"}</p>
+                    <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-wider font-bold">{user?.role?.name || "Sales"}</p>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
