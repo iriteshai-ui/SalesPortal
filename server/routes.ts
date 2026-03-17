@@ -1,16 +1,18 @@
 import type { Express } from "express";
-import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { type Server } from "http";
+import { seedDatabase } from "./seed";
+import authRouter from "./api/auth";
+import usersRouter from "./api/users";
+import rolesRouter from "./api/roles";
 
-export async function registerRoutes(
-  httpServer: Server,
-  app: Express
-): Promise<Server> {
-  // put application routes here
-  // prefix all routes with /api
+export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
+  // Seed DB with initial roles + users on startup
+  await seedDatabase();
 
-  // use storage to perform CRUD operations on the storage interface
-  // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
+  // ─── API routes ───────────────────────────────────────────────────────────
+  app.use("/api/auth", authRouter);
+  app.use("/api/users", usersRouter);
+  app.use("/api/roles", rolesRouter);
 
   return httpServer;
 }

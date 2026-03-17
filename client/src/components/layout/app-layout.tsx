@@ -4,7 +4,8 @@ import {
   LogOut, 
   Bell, 
   User as UserIcon,
-  LayoutDashboard
+  LayoutDashboard,
+  ShieldCheck,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
@@ -46,6 +47,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   Dashboard
                 </div>
               </Link>
+              {user?.role?.name === "Admin" && (
+                <Link href="/admin/users">
+                  <div className={`px-4 py-2 rounded-md text-sm font-medium transition-all cursor-pointer flex items-center gap-2 ${
+                    location === "/admin/users"
+                      ? "bg-blue-50 text-[#004499]"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  }`}>
+                    <ShieldCheck size={16} />
+                    User Management
+                  </div>
+                </Link>
+              )}
             </nav>
           </div>
 

@@ -33,7 +33,7 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, isLoading, setLocation]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError("");
     if (secureKey.trim().toUpperCase() !== MANAGEMENT_KEY) {
@@ -41,13 +41,11 @@ export default function LoginPage() {
       return;
     }
     setIsLoggingIn(true);
-    setTimeout(() => {
-      const result = login(email, password);
-      if (!result.success) {
-        setLoginError(result.error || "Login failed.");
-        setIsLoggingIn(false);
-      }
-    }, 700);
+    const result = await login(email, password);
+    if (!result.success) {
+      setLoginError(result.error || "Login failed.");
+      setIsLoggingIn(false);
+    }
   };
 
   const quickLogin = (u: typeof MOCK_USERS[0]) => {
