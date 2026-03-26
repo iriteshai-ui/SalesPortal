@@ -4,8 +4,9 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lock, ShieldCheck, AlertCircle, User, Zap } from "lucide-react";
+import { Lock, ShieldCheck, AlertCircle, User, Zap, FlaskConical } from "lucide-react";
 import loginBg from "@/assets/login-bg.jpg";
 import { Badge } from "@/components/ui/badge";
 
@@ -19,13 +20,15 @@ const PRODUCT_COLORS: Record<string, string> = {
 const MANAGEMENT_KEY = "NBFC-SEC-8472-9103-KM92-X";
 
 export default function LoginPage() {
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, bypassLogin, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState("admin@nbfc.com");
   const [password, setPassword] = useState("Admin@1234");
   const [secureKey, setSecureKey] = useState(MANAGEMENT_KEY);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const [bypassMode, setBypassMode] = useState(false);
+  const [selectedBypassUser, setSelectedBypassUser] = useState<typeof MOCK_USERS[0] | null>(MOCK_USERS[0]);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -36,6 +39,16 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError("");
+
+    if (bypassMode) {
+      if (!selectedBypassUser) {
+        setLoginError("Please select a test user to bypass with.");
+        return;
+      }
+      bypassLogin(selectedBypassUser);
+      return;
+    }
+
     if (secureKey.trim().toUpperCase() !== MANAGEMENT_KEY) {
       setLoginError("Invalid Management Secure Key.");
       return;
@@ -52,6 +65,7 @@ export default function LoginPage() {
     setEmail(u.email);
     setPassword(u.password);
     setSecureKey(MANAGEMENT_KEY);
+    setSelectedBypassUser(u);
     setLoginError("");
   };
 
@@ -173,59 +187,115 @@ export default function LoginPage() {
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
+              {/* ── UAT Bypass Checkbox ── */}
+              <div className={`flex items-start gap-3 rounded-lg border px-3 py-2.5 transition-colors ${bypassMode ? "bg-amber-50 border-amber-300" : "bg-slate-50 border-slate-200"}`}>
+                <Checkbox
+                  id="bypassMode"
+                  checked={bypassMode}
+                  onCheckedChange={(v) => { setBypassMode(!!v); setLoginError(""); }}
+                  className="mt-0.5 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
+                />
+                <div>
+                  <label htmlFor="bypassMode" className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 cursor-pointer select-none">
+                    <FlaskConical className="h-3.5 w-3.5 text-amber-500" />
+                    UAT Bypass Mode (No DB check)
+                  </label>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Skip DB authentication — for local testing only.</p>
+                </div>
+              </div>
+
               {loginError && (
                 <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5 text-sm text-red-600">
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
                   {loginError}
                 </div>
               )}
-              <div className="space-y-2">
-                <Label htmlFor="email">ADID / Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@nbfc.com"
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setLoginError(""); }}
-                  className="h-11 bg-slate-50 border-slate-200 focus:border-[#004499] focus:ring-[#004499]/20 transition-all"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => { setPassword(e.target.value); setLoginError(""); }}
-                  className="h-11 bg-slate-50 border-slate-200 focus:border-[#004499] focus:ring-[#004499]/20 transition-all"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="secureKey" className="flex items-center gap-2">
-                  Management Secure Key (23-digits)
-                  <ShieldCheck size={14} className="text-[#004499]" />
-                </Label>
-                <Input
-                  id="secureKey"
-                  type="text"
-                  placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXX"
-                  value={secureKey}
-                  onChange={(e) => { setSecureKey(e.target.value.toUpperCase()); setLoginError(""); }}
-                  className="h-11 font-mono text-xs tracking-widest bg-slate-50 border-slate-200 focus:border-[#004499] focus:ring-[#004499]/20 transition-all"
-                  required
-                  maxLength={30}
-                />
-                <p className="text-[10px] text-slate-400">Enterprise-grade 23-digit key required for management demo.</p>
-              </div>
+
+              {bypassMode ? (
+                /* ── Bypass mode: just pick a user ── */
+                <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <Label className="text-sm font-semibold text-slate-700">Select Test User</Label>
+                  <div className="space-y-2">
+                    {MOCK_USERS.map((u) => (
+                      <button
+                        key={u.id}
+                        type="button"
+                        onClick={() => { setSelectedBypassUser(u); setLoginError(""); }}
+                        className={`w-full flex items-center p-3 rounded-lg border-2 transition-all text-left ${selectedBypassUser?.id === u.id ? "border-amber-400 bg-amber-50" : "border-slate-100 bg-white hover:border-amber-200 hover:bg-amber-50/40"}`}
+                      >
+                        <div className="flex-1">
+                          <p className="text-sm font-bold text-slate-800">{u.name}</p>
+                          <p className="text-[11px] text-slate-400">{u.role} · {u.email}</p>
+                        </div>
+                        <div className="flex gap-1 flex-wrap justify-end">
+                          {u.products.length === 4 ? (
+                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 uppercase">All</span>
+                          ) : (
+                            u.products.map((p) => (
+                              <span key={p} className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${PRODUCT_COLORS[p] || "bg-slate-100 text-slate-600"}`}>{p}</span>
+                            ))
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                /* ── Normal mode: full credential fields ── */
+                <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">ADID / Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="name@nbfc.com"
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); setLoginError(""); }}
+                      className="h-11 bg-slate-50 border-slate-200 focus:border-[#004499] focus:ring-[#004499]/20 transition-all"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => { setPassword(e.target.value); setLoginError(""); }}
+                      className="h-11 bg-slate-50 border-slate-200 focus:border-[#004499] focus:ring-[#004499]/20 transition-all"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="secureKey" className="flex items-center gap-2">
+                      Management Secure Key (23-digits)
+                      <ShieldCheck size={14} className="text-[#004499]" />
+                    </Label>
+                    <Input
+                      id="secureKey"
+                      type="text"
+                      placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXX"
+                      value={secureKey}
+                      onChange={(e) => { setSecureKey(e.target.value.toUpperCase()); setLoginError(""); }}
+                      className="h-11 font-mono text-xs tracking-widest bg-slate-50 border-slate-200 focus:border-[#004499] focus:ring-[#004499]/20 transition-all"
+                      required
+                      maxLength={30}
+                    />
+                    <p className="text-[10px] text-slate-400">Enterprise-grade 23-digit key required for management demo.</p>
+                  </div>
+                </div>
+              )}
 
               <Button
                 type="submit"
-                className="w-full h-11 bg-[#004499] hover:bg-[#003377] text-white font-medium transition-all shadow-md hover:shadow-lg mt-2"
+                className={`w-full h-11 font-medium transition-all shadow-md hover:shadow-lg mt-2 ${bypassMode ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#004499] hover:bg-[#003377] text-white"}`}
                 disabled={isLoggingIn}
               >
-                {isLoggingIn ? "Verifying..." : (
+                {bypassMode ? (
+                  <span className="flex items-center gap-2">
+                    <FlaskConical size={16} /> Direct Access (No DB)
+                  </span>
+                ) : isLoggingIn ? "Verifying..." : (
                   <span className="flex items-center gap-2">
                     <Lock size={16} /> Secure Login
                   </span>

@@ -24,6 +24,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  bypassLogin: (mockUser: typeof MOCK_USERS[0]) => void;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -94,6 +95,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const bypassLogin = (mockUser: typeof MOCK_USERS[0]) => {
+    const syntheticUser: User = {
+      id: mockUser.id,
+      name: mockUser.name,
+      email: mockUser.email,
+      employeeId: mockUser.id,
+      branch: "Head Office, Mumbai",
+      designation: mockUser.role,
+      isActive: true,
+      role: { id: mockUser.id, name: mockUser.role, products: mockUser.products },
+      products: mockUser.products,
+    };
+    const fakeToken = "uat-bypass-token";
+    setToken(fakeToken);
+    setUser(syntheticUser);
+    localStorage.setItem("sales_token", fakeToken);
+    localStorage.setItem("sales_user", JSON.stringify(syntheticUser));
+    setLocation("/dashboard");
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -103,7 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!user, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, bypassLogin, logout, isAuthenticated: !!user, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
