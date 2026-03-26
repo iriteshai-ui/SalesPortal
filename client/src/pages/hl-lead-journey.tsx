@@ -518,7 +518,6 @@ export default function HlLeadJourneyPage() {
         </div>
         {renderProgress()}
       </div>
-
       <Card className="shadow-2xl border-slate-200/60 overflow-hidden rounded-2xl">
         <CardContent className="p-0">
 
@@ -530,7 +529,7 @@ export default function HlLeadJourneyPage() {
                   <Mail className="text-[#004499] h-8 w-8" />
                 </div>
                 <h2 className="text-2xl font-black text-slate-900 tracking-tight">Email Verification</h2>
-                <p className="text-slate-500 text-sm font-medium">Enter the customer's email to send an OTP.</p>
+                <p className="text-slate-500 text-sm font-medium">Enter the FOS email to send an OTP.</p>
               </div>
 
               <div className="space-y-6">
