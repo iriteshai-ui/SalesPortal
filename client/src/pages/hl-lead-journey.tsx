@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
-type JourneyStage = "stage1" | "stage2" | "stage3" | "stage4";
+type JourneyStage = "stage1" | "stage2" | "stage3" | "kyc_sim" | "stage4";
 
 const STAGES = [
   { id: 1, title: "Login" },
@@ -359,11 +359,32 @@ export default function HlLeadJourneyPage() {
 
   const handleS3Continue = () => {
     if (!linkGenerated) { toast({ variant: "destructive", title: "Generate Link First", description: "Please generate the journey link before continuing." }); return; }
+    setKycSimPhase("pending");
+    goTo("kyc_sim", 3);
+  };
+
+  // ─── KYC Simulator ──────────────────────────────────────────────────────
+  const [kycSimPhase, setKycSimPhase] = useState<"pending" | "rejected">("pending");
+
+  const handleKycApprove = () => {
+    confetti({ particleCount: 120, spread: 70, origin: { y: 0.4 }, colors: ["#004499", "#10b981"] });
     goTo("stage4", 4);
   };
 
+  const handleKycReject = () => {
+    setKycSimPhase("rejected");
+  };
+
+  const handleKycRetryApprove = () => {
+    confetti({ particleCount: 120, spread: 70, origin: { y: 0.4 }, colors: ["#004499", "#10b981"] });
+    goTo("stage4", 4);
+  };
+
+  const handleKycRetryReject = () => {
+    setKycSimPhase("rejected");
+  };
+
   // ─── Stage 4: KYC ───────────────────────────────────────────────────────
-  const kycLink = `https://kyc.nbfc.com/verify?ref=KYC${Date.now()}&email=${encodeURIComponent(email)}`;
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, { name: string; size: string }>>({});
   const [s4Errors, setS4Errors] = useState<Record<string, string>>({});
   const [invoiceAmount, setInvoiceAmount] = useState("350000");
@@ -992,6 +1013,84 @@ export default function HlLeadJourneyPage() {
             </div>
           )}
 
+          {/* ── KYC SIMULATOR ── */}
+          {stage === "kyc_sim" && (
+            <div className="p-10 space-y-8 animate-in slide-in-from-right-8 duration-500">
+              <div className="border-l-4 border-[#004499] pl-6 py-2">
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">KYC Verification</h2>
+                <p className="text-slate-500 text-sm font-medium italic">Simulate customer KYC outcome before proceeding to document submission.</p>
+              </div>
+
+              {kycSimPhase === "pending" && (
+                <div className="max-w-md mx-auto py-8 flex flex-col items-center text-center space-y-6 animate-in fade-in zoom-in-95 duration-400">
+                  <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center">
+                    <ShieldCheck className="h-12 w-12 text-[#004499]" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-black text-slate-900">KYC Pending</h3>
+                    <p className="text-sm text-slate-500 max-w-xs">Customer KYC link has been sent. Simulate the KYC outcome below.</p>
+                  </div>
+                  <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">UAT — Simulate KYC Result</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        onClick={handleKycApprove}
+                        className="h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-black gap-2 shadow-lg shadow-emerald-100"
+                      >
+                        <CheckCircle2 className="h-5 w-5" /> KYC Approved
+                      </Button>
+                      <Button
+                        onClick={handleKycReject}
+                        variant="outline"
+                        className="h-12 border-2 border-rose-300 text-rose-600 hover:bg-rose-50 font-black gap-2"
+                      >
+                        <XCircle className="h-5 w-5" /> KYC Rejected
+                      </Button>
+                    </div>
+                  </div>
+                  <Button variant="ghost" onClick={() => goTo("stage3", 3)} className="text-slate-400 text-xs hover:text-slate-600">
+                    <ArrowLeft className="h-3 w-3 mr-1" /> Back to Hospital Details
+                  </Button>
+                </div>
+              )}
+
+              {kycSimPhase === "rejected" && (
+                <div className="max-w-md mx-auto py-8 flex flex-col items-center text-center space-y-6 animate-in fade-in zoom-in-95 duration-400">
+                  <div className="w-24 h-24 bg-rose-50 rounded-full flex items-center justify-center">
+                    <XCircle className="h-12 w-12 text-rose-600" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-black text-rose-800">KYC Rejected</h3>
+                    <p className="text-sm text-slate-500 max-w-xs">Customer's KYC was not successful. You can retry the KYC verification.</p>
+                  </div>
+                  <div className="w-full bg-rose-50 border border-rose-100 rounded-2xl p-4 text-left space-y-2">
+                    <p className="text-xs font-black text-rose-700 uppercase tracking-wider">Rejection Reason</p>
+                    <p className="text-sm text-rose-600">• Document mismatch / unreadable image</p>
+                    <p className="text-sm text-rose-600">• Identity verification failed</p>
+                  </div>
+                  <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Retry KYC — Simulate Result</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        onClick={handleKycRetryApprove}
+                        className="h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-black gap-2 shadow-lg shadow-emerald-100"
+                      >
+                        <CheckCircle2 className="h-5 w-5" /> KYC Approved
+                      </Button>
+                      <Button
+                        onClick={handleKycRetryReject}
+                        variant="outline"
+                        className="h-12 border-2 border-rose-300 text-rose-600 hover:bg-rose-50 font-black gap-2"
+                      >
+                        <XCircle className="h-5 w-5" /> KYC Rejected
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ── STAGE 4: KYC ── */}
           {stage === "stage4" && (
             <div className="p-10 space-y-8 animate-in slide-in-from-right-8 duration-500">
@@ -999,29 +1098,6 @@ export default function HlLeadJourneyPage() {
                 <h2 className="text-2xl font-black text-slate-900 tracking-tight">KYC & Documents</h2>
                 <p className="text-slate-500 text-sm font-medium italic">Complete KYC verification and upload required documents.</p>
               </div>
-
-              {/* KYC Link */}
-              <section className="space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4" /> KYC Link
-                </h3>
-                <div className="p-6 bg-blue-50 border border-blue-100 rounded-2xl space-y-4">
-                  <p className="text-xs text-slate-500 font-medium">
-                    This link will be shared with the customer to complete KYC verification.
-                  </p>
-                  <div className="p-4 bg-white rounded-xl border border-blue-100 break-all font-mono text-[12px] text-slate-700 shadow-inner leading-relaxed">
-                    {kycLink}
-                  </div>
-                  <div className="flex gap-3">
-                    <Button onClick={() => copyLink(kycLink)} variant="outline" className="flex-1 border-blue-200 text-[#004499] hover:bg-blue-100/50 h-11 font-bold text-xs uppercase tracking-widest">
-                      <Copy className="mr-2 h-4 w-4" /> Copy KYC Link
-                    </Button>
-                    <Button onClick={() => toast({ title: "KYC Link Shared", description: "KYC link sent to customer via email." })} className="flex-1 bg-[#004499] hover:bg-[#003377] text-white h-11 font-bold text-xs uppercase tracking-widest">
-                      <Mail className="mr-2 h-4 w-4" /> Share via Email
-                    </Button>
-                  </div>
-                </div>
-              </section>
 
               {/* Document Upload */}
               <section className="space-y-5">
