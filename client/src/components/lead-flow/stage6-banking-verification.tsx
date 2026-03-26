@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { Loader2, Smartphone, Monitor, Clock, XCircle, CheckCircle2, RefreshCw, TrendingUp, ArrowRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import confetti from "canvas-confetti";
@@ -18,11 +19,14 @@ interface Props {
 }
 
 const fmt = (v: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(v);
+const calcEMI = (p: number, n: number) => { const r = 18 / 12 / 100; return Math.round(p * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1)); };
 
 export default function Stage6BankingVerification({ onComplete }: Props) {
   const [phase, setPhase] = useState<BVPhase>("idle");
   const [waitSeconds, setWaitSeconds] = useState(10);
   const [waitDone, setWaitDone] = useState(false);
+  const [amount, setAmount] = useState([850000]);
+  const [tenure, setTenure] = useState([36]);
 
   // Waiting timer (min 10 seconds)
   useEffect(() => {
@@ -193,42 +197,78 @@ export default function Stage6BankingVerification({ onComplete }: Props) {
     );
   }
 
-  // ── Success: AA Offer screen ───────────────────────────────────────────────
+  // ── Success: AA Offer screen (GST-style interactive offer) ────────────────
   if (phase === "success") {
+    const emi = calcEMI(amount[0], tenure[0]);
+    const pf = amount[0] * 0.02;
+    const gst = pf * 0.18;
+    const netDisburse = amount[0] - pf - gst - 500 - 3540;
     return (
-      <div className="max-w-xl mx-auto py-8 space-y-6 animate-in fade-in zoom-in-95 duration-500">
+      <div className="max-w-2xl mx-auto py-6 space-y-6 animate-in fade-in zoom-in-95 duration-500">
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
-            <CheckCircle2 className="h-8 w-8 text-emerald-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900">Banking Verified — Actual Offer</h2>
-          <p className="text-sm text-slate-500">Based on verified banking data, here is the refined offer</p>
+          <span className="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-black uppercase tracking-wider">Banking-Verified Offer</span>
+          <h2 className="text-2xl font-bold text-slate-900">Actual Offer — Banking Verified!</h2>
+          <p className="text-sm text-slate-500">Based on verified AA banking data — refined from pre-offer</p>
         </div>
 
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl p-6 text-white shadow-2xl shadow-emerald-200 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        {/* Sliders */}
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-8">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="font-bold text-slate-700">Loan Amount</p>
+              <div className="text-2xl font-black text-[#004499] bg-blue-50 px-4 py-1 rounded-lg">{fmt(amount[0])}</div>
+            </div>
+            <Slider value={amount} onValueChange={setAmount} min={500000} max={1000000} step={10000} className="py-2" />
+            <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
+              <span>₹5,00,000</span><span>₹10,00,000</span>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="font-bold text-slate-700">Tenure</p>
+              <div className="text-2xl font-black text-[#004499] bg-blue-50 px-4 py-1 rounded-lg">{tenure[0]} Months</div>
+            </div>
+            <Slider value={tenure} onValueChange={setTenure} min={12} max={60} step={6} className="py-2" />
+            <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
+              <span>12 Months</span><span>60 Months</span>
+            </div>
+          </div>
+
+          {/* Financial breakdown */}
+          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
             {[
-              { label: "Loan Amount", value: fmt(850000) },
-              { label: "Interest Rate", value: "18% p.a." },
-              { label: "Tenure", value: "36 Months" },
-              { label: "Monthly EMI", value: fmt(30700) },
+              { label: "Processing Fee (2%)", value: fmt(pf) },
+              { label: "GST (18% on PF)", value: fmt(gst) },
+              { label: "Stamp Duty", value: "₹500" },
+              { label: "Doc Charges", value: "₹3,540" },
             ].map(({ label, value }) => (
-              <div key={label} className="bg-white/10 rounded-xl p-3">
-                <p className="text-xs text-white/70 font-bold uppercase tracking-wider">{label}</p>
-                <p className="text-xl font-black text-white">{value}</p>
+              <div key={label} className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</p>
+                <p className="text-sm font-bold text-slate-700">{value}</p>
               </div>
             ))}
           </div>
-          <div className="bg-white/15 rounded-xl p-3">
-            <p className="text-xs text-white/70 font-bold uppercase tracking-wider">Net Disbursement</p>
-            <p className="text-2xl font-black text-white">{fmt(815000)}</p>
-            <p className="text-xs text-white/60 mt-1">After processing fees (2%), GST & stamp duty</p>
+
+          <div className="bg-emerald-50 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Net Disbursement</p>
+              <p className="text-[10px] text-emerald-600 italic">Amount to bank account</p>
+            </div>
+            <p className="text-2xl font-black text-emerald-800">{fmt(netDisburse)}</p>
+          </div>
+
+          <div className="bg-blue-50 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-slate-500">Monthly EMI</p>
+              <p className="text-xs text-slate-400">@ 18% Fixed p.a.</p>
+            </div>
+            <p className="text-3xl font-black text-slate-900">{fmt(emi)}<span className="text-xs font-medium text-slate-400 ml-1">/mo</span></p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Button onClick={() => onComplete("accepted")} className="h-12 bg-emerald-600 hover:bg-emerald-700 font-bold gap-2">
-            Accept Offer <ArrowRight className="h-4 w-4" />
+          <Button onClick={() => onComplete("accepted")} className="h-12 bg-[#004499] hover:bg-[#003377] font-bold text-base gap-2">
+            Accept Offer <ArrowRight className="h-5 w-5" />
           </Button>
           <Button onClick={() => onComplete("want_more")} variant="outline" className="h-12 border-2 border-[#004499] text-[#004499] hover:bg-blue-50 font-bold gap-2">
             <TrendingUp className="h-4 w-4" /> Want More
