@@ -165,7 +165,7 @@ export default function LeadJourneyPage() {
       {/* ── Content ─────────────────────────────────────────────────────────── */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 min-h-[500px]">
         {currentStep === 1 && <Stage1MobileConsent onComplete={handleStage1} />}
-        {currentStep === 2 && <BasicDetailsForm onComplete={handleStage2} />}
+        {currentStep === 2 && <BasicDetailsForm mobile={formData.mobile} onComplete={handleStage2} />}
         {currentStep === 3 && <BusinessDetailsStep onComplete={handleStage3} />}
         {currentStep === 4 && <Stage4OfferSimulation onComplete={handleStage4} />}
         {currentStep === 5 && <BrpDetailsForm onComplete={handleStage5} />}

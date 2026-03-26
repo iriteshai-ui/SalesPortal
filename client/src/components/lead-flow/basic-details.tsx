@@ -46,17 +46,18 @@ type CaseType = "new" | "wip" | "rejected" | null;
 
 interface BasicDetailsProps {
   onComplete: (data: z.infer<typeof formSchema>) => void;
+  mobile?: string;
 }
 
-export default function BasicDetailsForm({ onComplete }: BasicDetailsProps) {
+export default function BasicDetailsForm({ onComplete, mobile: prefillMobile }: BasicDetailsProps) {
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [statusChecked, setStatusChecked] = useState(false);
-  const [selectedCase, setSelectedCase] = useState<CaseType>(null);
+  const [selectedCase, setSelectedCase] = useState<CaseType>(prefillMobile ? "new" : null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      mobile: "",
+      mobile: prefillMobile ?? "",
       pan: "ABCDE1234F",
       fullName: "Vikram Malhotra",
       email: "vikram.m@example.com",
@@ -202,7 +203,7 @@ export default function BasicDetailsForm({ onComplete }: BasicDetailsProps) {
                         Check Status
                       </Button>
                     )}
-                    {selectedCase && (
+                    {selectedCase && !prefillMobile && (
                       <Button 
                         type="button" 
                         variant="outline"
