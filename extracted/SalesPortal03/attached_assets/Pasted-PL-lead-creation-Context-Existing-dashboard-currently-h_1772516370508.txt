@@ -1,0 +1,218 @@
+PL lead creation:
+
+Context
+Existing dashboard currently has a single CTA: "Create New Lead".
+This CTA is being replaced with two separate CTAs:
+Create BL Lead (Business Loan Lead)
+Create PL Lead (Personal Loan Lead)
+
+High-Level Requirements:
+Replace the existing "Create New Lead" CTA with:
+"Create BL Lead"
+"Create PL Lead"
+
+Create BL Lead
+Keep the existing functionality exactly as it is for "Create BL Lead".
+
+Whatever logic or flow currently implemented for "Create New Lead" should now be triggered by "Create BL Lead".
+
+Create PL Lead
+
+Add a dynamic progress bar that updates at each stage with percentage of the PL Lead journey.
+
+Implement a new flow as described in detail below. The journey is divided in stages.
+
+1. "Create PL Lead" - Entry Screen:
+
+Stage 1: Basic Details:
+
+When the user clicks "Create PL Lead" on the dashboard:
+
+This screen should initially show just one input:
+Mobile No.
+Input field
+Validation:
+Must be exactly 10 digits.
+Numeric only.
+Show a clear error message if validation fails (e.g., "Please enter a valid 10-digit mobile number").
+Once a valid 10-digit mobile number is entered and submitted (e-g., via a "Continue" or "Next" button):
+
+Show a loader screen for ~5 seconds with a message like:
+
+"We are doing some backend checks. Please wait" option are (Reject / WIP / New)
+After the 10-second loader, show a screen with three options representing the backend outcome:
+Reject
+WIP case
+New
+This can be treated like a simulator/manual selector for outcomes (useful for demo/testing).
+The user selects one of the three, and the corresponding flow is triggered.
+
+ If "Reject" is selected
+Show a Rejection screen.
+Display a message like:
+"User can try after {{random days)) days."
+Here, {(random days)} is a random integer between 1 and 30.
+The system should generate this random number at runtime.
+Insert it dynamically into the message.
+Provide a simple way to go back to the dashboard or start a new PL Lead attempt (e-g-,
+"Back to Dashboard" button) -
+
+If "WIP case" is selected
+Logic:
+Send a demo link (or placeholder) to the entered mobile number.
+In production, this could be an SMS.
+For now, you can simulate this (e.g., request to backend or a mock success message).
+UI:
+Show a confirmation message such as:
+"A demo link has been sent to ((mobile number)}."
+Allow navigation back to dashboard or option to create another lead.
+
+If "New" is selected
+When the outcome is New, display a detailed form for PL Lead creation with the following fields:
+
+PAN Number
+Input field
+Validation:
+Apply standard PAN format validation (e-g-, 10 characters: 5 alphabets, 4 digits, 1 alphabet - adapt as per standard).
+Show a clear error (e-g., "Please enter a valid PAN.").
+
+Name as per PAN
+Text input
+Required.
+
+DOB (Date of Birth)
+Date input.
+Required.
+You may add logical validations (e-g-, user must be ›= 18 years), or keep basic date validation as minimum.
+
+Email ID
+Text/email input
+Validation:
+Standard email format validation.
+Show proper error (e-g-, "Please enter a valid email address.").
+
+Gender
+Dropdown or radio buttons (e-g, Male / Female / Other - define choices clearly).
+
+Employment Type:
+Check Box:
+1.Self Employed
+2.Saleried Person 
+
+If Self-employed:
+No additional fields keep the rest as it is.
+
+If Salaried
+show 3 extra fields (all **Required**):
+1. Employee Name
+2. Total Income (Monthly)
+Validation: must be greater than 30,000. if less than 30,000 show error message "Salary should be greater than 30,000
+3. Total Experience: Should be numeric and add place holder as "Enter experience in months and should be greater than months)
+
+Address Line 1
+Text input
+Required.
+
+Address Line 2
+Text input
+
+
+Pincode
+Text/number input
+Suggested validation:
+Numeric.
+Fixed length (e-g., 6 digits for Indian pincode), if applicable.
+On Pincode blur (or after 6 valid digits) Call a Pincode lookup (backend or API) to get City & State Populate City & State (read-only)
+
+Button: "Create Lead"
+Primary CTA at the bottom of the form.
+
+Behavior on "Create Lead"
+Validate all mandatory fields as per above rules.
+If validation fails:
+Show inline error messages and prevent submission.
+
+Stage 2: Consent: of pregress bar
+
+If validation passes:
+Trigger lead creation process and then:
+"Submitting your details and checking bureau consent…."
+After the loader, move to Bureau Consent Simulation.
+
+6. Bureau Consent Simulation
+After "Create Lead" submission:
+Show a simulated bureau consent screen with: Here keep the progress bar stage as
+"Consent"
+A message like:
+"We have sent a bureau consent request to {(mobile_number}}."
+Two buttons:
+Approve Reject
+Behavior:
+If Approve is selected:
+Proceed to the Offer Color Selection screen (next section).
+
+If Reject is selected:
+Show a simple rejection/exit screen.
+You can use text like:
+"Bureau consent not provided. We are unable to proceed with your application." Provide a way to return to dashboard.
+
+Stage 3: Consent Approved
+
+Offer Color Selection (after Bureau Consent Approved)
+If bureau consent is approved, show an attractive screen with:
+A message such as:
+"Your offer is just a step away."
+Four options (buttons or cards) with color choices:
+This can be treated like a simulator/manual selector for outcomes (useful for demo/testing
+The user selects one of the three, and the corresponding flow is triggered.
+
+Blue
+Yellow
+Green
+Red
+Each color leads to a different flow:
+
+Stage 4 : Offer
+
+7.1 If Blue is selected
+Show an attractive offer screen. with the progress bar stage as
+"Offer"
+Display an offer amount between 50 thousand to 5 lakh (Personal Loan amount range).
+Implement as a random amount within this range (e-g-,
+1,00,000 to 5,00,000 in INR,
+or as a configurable range - specify your approach.
+
+also add slider bar where user can select the offer range between minimum 50 Thousand and and maximum upto offer shown on the offer screen
+
+Example message:
+"Congratulations! You are eligible for a personal loan offer of {{offer amount}}."
+
+7.2 If Red is selected
+
+Show a rejection screen with the exact error message:
+"Your application is rejected"
+Allow navigation back to dashboard or another lead creation.
+
+7.3 If Yellow is selected
+Note: For this stage the stage will directly go to Bank verification stage in progress bar.
+Show a screen with a message like:
+"Initiate your bank verification."
+
+Include a button/link to redirect the user to the bank verification stage of the journey.
+For now, you can:
+Either link to a placeholder route/screen.
+
+
+7.4 If Green is selected
+
+Show an attractive offer screen similar to Blue (you can reuse design or differentiate slightly) - Additionally, include a link or button to redirect to bank verification.
+
+Note: Keep the progress bar stage as Offer and when redirect to bank verification stage move the progress bar stage to "Bank verification"
+Example:
+"Great news! You can proceed further. Click below to proceed with bank verification."  Button: "Proceed to Bank Verification" and rout to bank verification page
+
+Stage 5:Bank Verification
+
+8. Bank Verification.
+
+When user lands on bank verification stage. show a message as "Click the below link to initiate bank verification" and give a button with link(give demo link)

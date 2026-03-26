@@ -1,0 +1,271 @@
+Currently on the dashboard 
+We have three CTAs on the dashboard:
+1. ﻿﻿BL Lead
+2. ﻿﻿PL Lead
+3. ﻿﻿﻿Link Generation
+New Requirement:
+Add a fourth CTA with the label: "EL Lead" Placement: Immediately next to "PL Lead"
+Style/format: Match existing CTA design, size, color theme, and interaction behavior
+overview- we are creating a new assisted loan journey for education loan. 
+When the user clicks the EL Lead CTA on dashboard :
+A new independent lead journey should start
+This journey is separate from BL and PL journeys
+It will follow the flow described below
+Guide the customer through each stage (assisted journey) • See a progress bar with stages and progress %.
+
+Track at which stage the application currently is and where the journey is stuck.
+
+Focus only on front-end/UI (no real backend); use mock/stub functions for jAPI calls and OTP/AA verification.
+
+Global UX & Layout
+Show a fixed progress bar at the top on all steps:
+Stages:
+Student Basic Details
+Academic Info (Primary)
+Co-Applicant Onboarding
+Account Aggregator (Bank Connect)
+Display each stage label and an approximate progress
+percentage (e.g-, 25%, 50%, 75%, 100%).
+Visually highlight the current stage.
+Use a card-like layout with clear section headings.
+All validation errors must be inline, just below the respective field, in f{validation error_style}}.
+Disable the primary CTA when the form is submitting or when validation fails.
+Use {{primary_color}}, {{secondary_color}}, and {{font_family}} consistently.
+Assume users are internal sales agents; keep copy concise, clear and a bit formal.
+
+Stage: Mobile Number Capture
+First screen (before Stage 1):
+
+Title: "Start Application"
+Field:
+Mobile Number
+Input type: tel
+Validation:
+Mandatory
+{(mobile_number_validation_rules}} (e-g., Indian 10-digit, starts with 6-9)
+Show inline error for invalid or empty input.
+CTA: "Continue" (disabled until mobile is valid).
+On successful validation, navigate to Stage 1 - Student Basic Details and show progress bar.
+Stage 1. Student Basic Details
+Show stage title and number clearly: "Stage 1 of 4 - Student Basic Details".
+Fields & Validations
+PAN
+Mandatory.
+Format: exactly 10 characters. Pattern: AAAAA9999A
+First 5: letters A-Z
+Next 4: digits 0-9
+Last 1: letter A-Z
+4th character must be «p" (individual).
+Case-insensitive but normalize to uppercase.
+
+Inline error if format invalid.
+Full Name
+
+Mandatory-
+Max length: 20 characters.
+Spaces allowed.
+No numerics or special characters (only letters and spaces).
+Show error if empty, exceeds 20 chars, or contains invalid characters.
+Date of Birth (DOB)
+Mandatory
+Use a date-picker.
+Business rule: Age must be >= 18 years as of current date.
+No future dates allowed.
+Show inline error if age ‹ 18 or date invalid.
+Email
+Mandatory.
+Validate with a standard email regex.
+Show inline error if invalid format.
+Gender
+Mandatory•
+Use radio buttons or a dropdown (e.g., Male, Female, Other).
+Communication Address
+
+Fields:
+Address Line 1 (mandatory, min length ({address_linel min_length}}).
+Address Line 2 (optional or configurable).
+Pin Code (mandatory) -
+City (auto-filled, read-only or non-editable).
+State (auto-filled, read-only or non-editable).
+Behavior:
+On Pin Code blur/change, call a mock API to auto-fill City and State from pincode.
+If pincode is invalid / API error, show inline error and do not populate city/state.
+Validation:
+Pin Code must be numeric and match {(pincode_pattern}}.
+Address Line 1 must meet minimum length.
+
+Button Behavior
+CTA: "Continue".
+On click:
+Validate all mandatory fields.
+If any input is invalid, show inline error messages and do not proceed.
+If all inputs are valid, show a full-screen / modal loader for ~5 seconds with message:
+"We are processing your request."
+
+After loader completes, navigate to Stage 2 - Academic Info (Primary) and update the progress bar.
+
+Stage 2. Academic Info (Primary)
+Show title: "Stage 2 of 4 - Academic Info (Primary)"
+Fields & Logic
+Qualification
+Use radio buttons (not checkboxes) for:
+Under Graduate
+Post Graduate
+Mandatory.
+Is your university selected?
+Radio buttons: Yes / No
+Mandatory • Country
+Dropdown or text input.
+Mandatory •
+University Name
+Mandatory •
+Institute Name
+Mandatory•
+Course Name
+
+Mandatory•
+Course Duration (in months)
+Numeric only.
+Positive integer.
+Mandatory•
+10th Passing Year
+Numeric, 4-digit year.
+Reasonable range (e.g, 1980-current_year) • Mandatory • 12th Passing Year
+Numeric, 4-digit year.
+Must be ≥ 10th passing year.
+Mandatory.
+Graduation Passing Year
+
+Show this field only when Qualification = Post Graduate (PG).
+Numeric, 4-digit year.
+Must be ≥ 12th passing year.
+Graduation Duration (in years)
+
+Show only when Qualification = PG.
+Numeric (allow decimals if needed, e.g., 3 or 3.5).
+Graduation Score (up to 2 decimal places)
+Show only when:
+Qualification = Post Graduate
+AND Is your university selected? = Yes
+Validation:
+Numeric.
+Up to 2 decimal places.
+Within a plausible range (e.g., 0-100 or 0-10; choose and document).
+If invalid, show inline error.
+Expected Loan Amount
+Numeric input.
+Positive value.
+Optionally format with thousand separators.
+Mandatory
+
+Button Behavior
+СТА: "Submit Academic Info" (or just "Submit").
+On click:
+Validate all visible mandatory fields.
+Show inline errors for any invalid/empty fields.
+If all valid, show loader for ~10 seconds with:
+"We are processing your request."
+Then navigate to Stage 3 - Co-Applicant Onboarding and update progress.
+
+
+Stage 3. Co-Applicant Onboarding (Up to 4):
+
+Title: "Stage 3 of 4 - Co-Applicant Onboarding"
+Intro Text
+Display the following explanatory text at the top of the screen:
+"A co-applicant is an individual who applies for a loan alongside another person.
+Both applicants share responsibility for repaying the debt."
+Core Behaviors
+Provide a CTA button: "Add co-applicant".
+Allow adding up to 4 co-applicants.
+For each co-applicant:
+Show a collapsible card with their details once captured.
+Provide buttons like Edit and Remove (you can design a simple interaction).
+
+Co-applicant Mobile Number
+Input type: tel.
+Mandatory •
+Use same mobile validation as primary applicant ({(mobile_number_validation_rules}}).
+Show inline error for invalid/empty value.
+Next to it, show a "Send op" button.
+On click of "Send oTP":
+Validate mobile first.
+Call a mock async function simulating an API to send OTP.
+Show success message (e.g., "OTP sent successfully") or error if mock fails.
+OTP
+
+Input appears after OTP is "sent".
+Constraints:
+
+Exactly 6 digits.
+Show inline error for invalid length or non-digit characters.
+Button: "Verify OTP".
+On click:
+Call a mock function to "verify" op.
+On success:
+Lock the mobile field.
+Mark OTP as verified (visual indicator).
+Then show Co-Applicant Details section.
+On failure: show inline error (e.g., "Invalid OTP, please try again").
+Co-Applicant Details (visible only after OTP verification)
+For each co-applicant, show these fields:
+I
+PAN
+Mandatory.
+Use same PAN format as primary (10 chars, AAAAA9999A, 4th char = "p").
+Relationship with primary Applicant
+
+Dropdown with options: Father, Mother, Brother.
+Mandatory.
+Name as per PAN
+Mandatory.
+Same name rules: letters + spaces only, reasonable max length.
+DOB as per PAN
+Mandatory.
+Use date-picker.
+Age must be ≥ 18 years.
+Gender
+Mandatory.
+Radio or dropdown (Male, Female, other) • Official Email ID
+Mandatory•
+Standard email validation.
+Type of Co-applicant
+Checkbox or radio-style selection:
+
+Financial
+Non-financial
+Enforce at least one selection.
+Profession Type
+Checkbox or radio-style selection:
+Salaried
+Self Employed
+Enforce exactly one selection.
+Address Line 1
+Mandatory •
+Minimum length ({address_line1_min_length}}.
+Address Line 2
+Optional.
+Pin Code (City, State)
+
+Pin Code mandatory, numeric, pattern {(pincode_pattern}}.
+On valid Pin Code, auto-fill City and State from a mock API ((similar to Stage 1).
+Show inline error if invalid/unknown pincode.
+Buttons & Navigation
+For each co-applicant details block, provide:
+
+"Save Co-applicant" button
+(validates fields, then collapses the panel into a summary card).
+At the bottom:
+"Add another co-applicant" (disabled when 4 are already added).
+"Continue" button to move to the next stage, enabled when:
+At least two co-applicant is saved
+On Continue, navigate to Stage 5 - Account Aggregator (Bank Connect) 
+
+Stage 5. Bank Connect
+Title: "Stage 5 - Account Aggregator (Bank Connect)"
+(Assume Stage 4 is handled elsewhere.)
+Inputs / Data Capture
+Show a demo link with message Cick the below link to initiate bank verification (Link should be able to copy) .
+And Give a button to redirect back to dashboad with name (Back to Dashboard).
+
+Once the journey is complete till here add the lead in the dashboard.
