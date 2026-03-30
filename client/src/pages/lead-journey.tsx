@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle2, User } from "lucide-react";
+import { ArrowLeft, CheckCircle2, User, ExternalLink, Clock } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 
@@ -40,6 +40,23 @@ export default function LeadJourneyPage() {
 
   const appId = useMemo(() => `BL-${Math.floor(Math.random() * 90000) + 10000}`, []);
   const MOCK_AGENT = { name: "Arjun Verma", code: "AG-MUM-2841" };
+
+  // PL Journey Link — 30-second freeze after click
+  const [plLinkCooldown, setPlLinkCooldown] = useState(0);
+
+  useEffect(() => {
+    if (plLinkCooldown <= 0) return;
+    const t = setTimeout(() => setPlLinkCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [plLinkCooldown]);
+
+  const handlePlLink = () => {
+    if (plLinkCooldown > 0) return;
+    setPlLinkCooldown(30);
+    // Mock: copy a PL journey link to clipboard
+    const link = `${window.location.origin}/pl-journey?ref=${appId}`;
+    navigator.clipboard.writeText(link).catch(() => {});
+  };
 
   const next = (newVisible?: number[]) => {
     if (newVisible) setVisibleSteps(newVisible);
@@ -121,6 +138,31 @@ export default function LeadJourneyPage() {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold font-heading text-slate-900">Business Loan Application</h1>
           <div className="flex items-center gap-3">
+            {/* PL Journey Link CTA — visible from Stage 4 */}
+            {currentStep >= 4 && (
+              <Button
+                onClick={handlePlLink}
+                disabled={plLinkCooldown > 0}
+                className={cn(
+                  "h-9 px-4 font-bold text-xs uppercase tracking-widest gap-2 transition-all",
+                  plLinkCooldown > 0
+                    ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+                    : "bg-[#004499] hover:bg-[#003377] text-white shadow-md shadow-blue-100"
+                )}
+              >
+                {plLinkCooldown > 0 ? (
+                  <>
+                    <Clock className="h-3.5 w-3.5 animate-pulse" />
+                    Sent — wait {plLinkCooldown}s
+                  </>
+                ) : (
+                  <>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    PL Journey Link
+                  </>
+                )}
+              </Button>
+            )}
             {/* Agent badge */}
             <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
               <div className="w-7 h-7 rounded-full bg-[#004499]/10 flex items-center justify-center shrink-0">
