@@ -77,8 +77,8 @@ export default function LeadJourneyPage() {
       return;
     }
     if (outcome === "blue_accepted") {
-      // Blue path: skip BRP & banking, go to Stage 8
-      goTo(8, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+      // Blue path: go to Banking Verification (Stage 6) — banking is mandatory for all segments
+      goTo(6, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
       return;
     }
     if (outcome === "direct_banking") {
