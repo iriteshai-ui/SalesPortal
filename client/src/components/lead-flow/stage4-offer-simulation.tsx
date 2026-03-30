@@ -6,7 +6,7 @@ import confetti from "canvas-confetti";
 type Segment = "reject" | "blue" | "yellow" | "green";
 
 interface Props {
-  onComplete: (nextStage: "rejected" | "blue_accepted" | "banking_verification") => void;
+  onComplete: (nextStage: "rejected" | "blue_accepted" | "banking_verification" | "direct_banking") => void;
 }
 
 const fmt = (v: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(v);
@@ -39,9 +39,9 @@ export default function Stage4OfferSimulation({ onComplete }: Props) {
 
   const handleYGContinue = () => {
     if (brpFlag) {
-      onComplete("banking_verification");
+      onComplete("banking_verification"); // BRP YES → Stage 5 (BRP Details)
     } else {
-      setPhase("blue");
+      onComplete("direct_banking"); // BRP NO → Stage 6 (Banking Verification), skip BRP
     }
   };
 
@@ -179,12 +179,12 @@ export default function Stage4OfferSimulation({ onComplete }: Props) {
             >
               <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${brpFlag ? "translate-x-6" : ""}`} />
             </button>
-            <span className="text-sm font-semibold text-slate-700">BRP Flag: <span className={brpFlag ? "text-[#004499]" : "text-slate-400"}>{brpFlag ? "YES → Banking Verification" : "NO → Blue Offer Flow"}</span></span>
+            <span className="text-sm font-semibold text-slate-700">BRP Flag: <span className={brpFlag ? "text-[#004499]" : "text-slate-400"}>{brpFlag ? "YES → BRP Details" : "NO → Banking Verification"}</span></span>
           </div>
         </div>
 
         <Button onClick={handleYGContinue} className={`w-full h-12 font-bold text-base gap-2 ${isGreen ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200" : "bg-amber-500 hover:bg-amber-600 shadow-amber-200"} text-white shadow-lg`}>
-          {brpFlag ? "Continue to Banking Verification" : "Continue with Blue Offer"}
+          {brpFlag ? "Continue to BRP Details" : "Continue to Banking Verification"}
           <ArrowRight className="h-5 w-5" />
         </Button>
       </div>

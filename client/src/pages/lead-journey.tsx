@@ -71,18 +71,23 @@ export default function LeadJourneyPage() {
     goTo(4, [1, 2, 3, 4]);
   };
 
-  const handleStage4 = (outcome: "rejected" | "blue_accepted" | "banking_verification") => {
+  const handleStage4 = (outcome: "rejected" | "blue_accepted" | "banking_verification" | "direct_banking") => {
     if (outcome === "rejected") {
       setLocation("/dashboard");
       return;
     }
     if (outcome === "blue_accepted") {
       // Blue path: skip BRP & banking, go to Stage 8
-      goTo(8, [1, 2, 3, 4, 8, 9, 10, 11]);
+      goTo(8, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
       return;
     }
-    // Banking verification path (Yellow/Green with BRP flag)
-    goTo(5, [1, 2, 3, 4, 5, 6, 8, 9, 10, 11]);
+    if (outcome === "direct_banking") {
+      // Yellow/Green + BRP NO: skip BRP, go straight to Banking Verification (Stage 6)
+      goTo(6, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+      return;
+    }
+    // Yellow/Green + BRP YES: go to BRP Details (Stage 5)
+    goTo(5, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
   };
 
   const handleStage5 = (data: any) => {
