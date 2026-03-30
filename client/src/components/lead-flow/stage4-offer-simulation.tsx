@@ -160,9 +160,13 @@ export default function Stage4OfferSimulation({ onComplete }: Props) {
           <h2 className="text-2xl font-bold text-slate-900">{isGreen ? "Best Offer Available" : "Conditional Offer"}</h2>
         </div>
         <div className={`rounded-2xl p-6 text-center ${isGreen ? "bg-gradient-to-br from-emerald-500 to-emerald-700" : "bg-gradient-to-br from-amber-500 to-amber-700"} text-white shadow-xl`}>
-          <p className="text-sm font-bold uppercase tracking-widest text-white/80 mb-2">Approved Amount</p>
-          <div className="text-4xl font-black">{fmt(isGreen ? 1000000 : 850000)}</div>
-          <p className="text-white/70 text-sm mt-2">Subject to banking verification</p>
+          <p className="text-sm font-bold uppercase tracking-widest text-white/80 mb-3">Offer Status</p>
+          <div className="text-xl font-black tracking-tight">
+            {isGreen ? "Best Offer Eligible" : "Conditional Offer Eligible"}
+          </div>
+          <p className="text-white/70 text-sm mt-2">
+            Approved amount will be generated after banking verification
+          </p>
         </div>
 
         {/* BRP Flag toggle */}
