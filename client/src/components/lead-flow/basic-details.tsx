@@ -20,6 +20,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
+const PURPOSES = ["Business Expansion", "Working Capital", "Equipment Purchase", "Inventory Financing", "Office Renovation", "Debt Consolidation", "Others"];
+const MARITAL = ["Single", "Married", "Divorced", "Widowed"];
+
 const formSchema = z.object({
   mobile: z.string().length(10, "Mobile number must be 10 digits"),
   pan: z.string().length(10, "Invalid PAN format"),
@@ -40,6 +43,9 @@ const formSchema = z.object({
     }
     return age >= 21;
   }, "Minimum age must be 21 years"),
+  purposeOfLoan: z.string().optional(),
+  fatherName: z.string().optional(),
+  maritalStatus: z.string().optional(),
 });
 
 type CaseType = "new" | "wip" | "rejected" | null;
@@ -69,6 +75,9 @@ export default function BasicDetailsForm({ onComplete, mobile: prefillMobile }: 
       city: "Mumbai",
       state: "Maharashtra",
       dob: new Date("1990-01-15"),
+      purposeOfLoan: "",
+      fatherName: "",
+      maritalStatus: "",
     },
   });
 
@@ -434,6 +443,69 @@ export default function BasicDetailsForm({ onComplete, mobile: prefillMobile }: 
                         <FormControl>
                           <Input {...field} readOnly className="bg-slate-100 h-11" />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Additional Details — optional */}
+              <div className="space-y-4 pt-4">
+                <h4 className="text-sm font-semibold text-slate-700 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
+                  Additional Details
+                  <span className="text-[10px] normal-case font-medium text-slate-400 tracking-normal">(Optional)</span>
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="purposeOfLoan"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-600">Purpose of Loan</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="border-slate-200 h-11">
+                              <SelectValue placeholder="Select purpose" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {PURPOSES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="fatherName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-600">Father's Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Father's full name" className="h-11" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="maritalStatus"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-600">Marital Status</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="border-slate-200 h-11">
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {MARITAL.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
