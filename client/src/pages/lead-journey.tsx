@@ -36,7 +36,7 @@ export default function LeadJourneyPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<any>({});
   // which stages are visible in the stepper (changes based on path taken)
-  const [visibleSteps, setVisibleSteps] = useState<number[]>([1, 2, 3, 4]);
+  const [visibleSteps, setVisibleSteps] = useState<number[]>([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
 
   const appId = useMemo(() => `BL-${Math.floor(Math.random() * 90000) + 10000}`, []);
   const MOCK_AGENT = { name: "Arjun Verma", code: "AG-MUM-2841" };
