@@ -291,6 +291,7 @@ export default function ElLeadJourneyPage() {
 
   const currentStageId = stage === "loading" ? stageToNum(loadingTarget) : stageToNum(stage);
   const progressPercentage = stage === "mobile" ? 0 : Math.round((currentStageId / 10) * 100);
+  const MOCK_AGENT = { name: "Rohit Joshi", code: "AG-PUN-3304" };
 
   const getActiveStageId = () => {
     if (stage === "mobile") return 0;
@@ -674,9 +675,22 @@ export default function ElLeadJourneyPage() {
             <h1 className="text-3xl font-heading font-black text-slate-900 tracking-tight">EL Lead Journey</h1>
             <p className="text-slate-500 mt-1 font-medium italic">Assisted education loan application flow.</p>
           </div>
-          <div className="text-right">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Journey Progress</p>
-            <p className="text-sm font-black text-[#004499]">{progressPercentage}% Complete</p>
+          <div className="flex items-center gap-3">
+            {/* Agent badge */}
+            <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
+              <div className="w-7 h-7 rounded-full bg-[#004499]/10 flex items-center justify-center shrink-0">
+                <UserIcon className="h-4 w-4 text-[#004499]" />
+              </div>
+              <div>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Agent</p>
+                <p className="text-sm font-bold text-slate-800 leading-tight">{MOCK_AGENT.name}</p>
+                <p className="text-[10px] font-mono text-[#004499] leading-none">{MOCK_AGENT.code}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Journey Progress</p>
+              <p className="text-sm font-black text-[#004499]">{progressPercentage}% Complete</p>
+            </div>
           </div>
         </div>
 
