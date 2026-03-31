@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Loader2, TrendingUp, XCircle, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Loader2, TrendingUp, XCircle, ArrowRight, CheckCircle2, Calculator, Banknote, CalendarIcon, Clock } from "lucide-react";
 import confetti from "canvas-confetti";
 
 interface Props { onComplete: () => void; }

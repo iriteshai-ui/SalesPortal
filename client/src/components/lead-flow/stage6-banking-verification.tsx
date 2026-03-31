@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Loader2, Smartphone, Monitor, Clock, XCircle, CheckCircle2, RefreshCw, TrendingUp, ArrowRight } from "lucide-react";
+import { Loader2, Smartphone, Monitor, Clock, XCircle, CheckCircle2, RefreshCw, TrendingUp, ArrowRight, Calculator, Banknote, CalendarIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import confetti from "canvas-confetti";
 
@@ -197,80 +197,103 @@ export default function Stage6BankingVerification({ onComplete }: Props) {
     );
   }
 
-  // ── Success: AA Offer screen (GST-style interactive offer) ────────────────
+  // ── Success: AA Offer screen — PL-style 2-column interactive layout ─────────
   if (phase === "success") {
     const emi = calcEMI(amount[0], tenure[0]);
     const pf = amount[0] * 0.02;
-    const gst = pf * 0.18;
-    const netDisburse = amount[0] - pf - gst - 500 - 3540;
+    const gstAmt = pf * 0.18;
+    const netDisburse = amount[0] - pf - gstAmt - 500 - 3540;
     return (
-      <div className="max-w-2xl mx-auto py-6 space-y-6 animate-in fade-in zoom-in-95 duration-500">
+      <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
         <div className="text-center space-y-2">
           <span className="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-black uppercase tracking-wider">Banking-Verified Offer</span>
-          <h2 className="text-2xl font-bold text-slate-900">Actual Offer — Banking Verified!</h2>
-          <p className="text-sm text-slate-500">Based on verified AA banking data — refined from pre-offer</p>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Actual Offer — Banking Verified!</h2>
+          <p className="text-slate-500 font-medium italic">Based on verified AA banking data — refined from pre-offer</p>
         </div>
 
-        {/* Sliders */}
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-8">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <p className="font-bold text-slate-700">Loan Amount</p>
-              <div className="text-2xl font-black text-[#004499] bg-blue-50 px-4 py-1 rounded-lg">{fmt(amount[0])}</div>
-            </div>
-            <Slider value={amount} onValueChange={setAmount} min={500000} max={1000000} step={10000} className="py-2" />
-            <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
-              <span>₹5,00,000</span><span>₹10,00,000</span>
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <p className="font-bold text-slate-700">Tenure</p>
-              <div className="text-2xl font-black text-[#004499] bg-blue-50 px-4 py-1 rounded-lg">{tenure[0]} Months</div>
-            </div>
-            <Slider value={tenure} onValueChange={setTenure} min={12} max={60} step={6} className="py-2" />
-            <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
-              <span>12 Months</span><span>60 Months</span>
-            </div>
-          </div>
-
-          {/* Financial breakdown */}
-          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
-            {[
-              { label: "Processing Fee (2%)", value: fmt(pf) },
-              { label: "GST (18% on PF)", value: fmt(gst) },
-              { label: "Stamp Duty", value: "₹500" },
-              { label: "Doc Charges", value: "₹3,540" },
-            ].map(({ label, value }) => (
-              <div key={label} className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</p>
-                <p className="text-sm font-bold text-slate-700">{value}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left: Configuration Panel */}
+          <div className="space-y-10 bg-slate-50 p-8 rounded-3xl border border-slate-100">
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Banknote className="h-5 w-5 text-[#004499]" />
+                  <p className="font-black text-slate-700 uppercase tracking-widest text-xs">Loan Amount</p>
+                </div>
+                <div className="text-2xl font-black text-[#004499] bg-white px-4 py-1 rounded-xl shadow-sm border border-slate-100">
+                  {fmt(amount[0])}
+                </div>
               </div>
-            ))}
+              <Slider value={amount} onValueChange={setAmount} min={500000} max={1000000} step={10000} className="py-4" />
+              <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <span>Min: ₹5,00,000</span><span>Max: ₹10,00,000</span>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="h-5 w-5 text-[#004499]" />
+                  <p className="font-black text-slate-700 uppercase tracking-widest text-xs">Tenure</p>
+                </div>
+                <div className="text-2xl font-black text-[#004499] bg-white px-4 py-1 rounded-xl shadow-sm border border-slate-100">
+                  {tenure[0]} <span className="text-xs text-slate-400">Mo</span>
+                </div>
+              </div>
+              <Slider value={tenure} onValueChange={setTenure} min={12} max={60} step={6} className="py-4" />
+              <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <span>12 Months</span><span>60 Months</span>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-emerald-50 rounded-xl p-4 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Net Disbursement</p>
-              <p className="text-[10px] text-emerald-600 italic">Amount to bank account</p>
+          {/* Right: Breakdown Panel */}
+          <div className="space-y-6">
+            {/* Dark blue EMI card */}
+            <div className="p-8 bg-[#004499] text-white rounded-3xl shadow-xl shadow-blue-100 space-y-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <Calculator size={120} />
+              </div>
+              <div className="relative z-10">
+                <p className="text-xs font-black text-blue-200 uppercase tracking-widest mb-2">Estimated Monthly EMI</p>
+                <div className="text-5xl font-black">{fmt(emi)}<span className="text-lg font-bold opacity-60">/mo</span></div>
+                <div className="flex items-center gap-2 mt-4 text-[10px] font-bold text-blue-100 bg-blue-800/40 w-fit px-3 py-1 rounded-full border border-blue-700/50">
+                  <Clock className="h-3 w-3" /> FIXED INTEREST: 18% P.A.
+                </div>
+              </div>
             </div>
-            <p className="text-2xl font-black text-emerald-800">{fmt(netDisburse)}</p>
-          </div>
 
-          <div className="bg-blue-50 rounded-xl p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-500">Monthly EMI</p>
-              <p className="text-xs text-slate-400">@ 18% Fixed p.a.</p>
+            {/* Fee breakdown 2×2 grid */}
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { label: "Processing Fee (2%)", value: fmt(pf) },
+                { label: "GST (18% on PF)", value: fmt(gstAmt) },
+                { label: "Stamp Duty", value: "₹500" },
+                { label: "Doc Charges", value: "₹3,540" },
+              ].map(({ label, value }) => (
+                <div key={label} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+                  <p className="text-sm font-bold text-slate-700">{value}</p>
+                </div>
+              ))}
             </div>
-            <p className="text-3xl font-black text-slate-900">{fmt(emi)}<span className="text-xs font-medium text-slate-400 ml-1">/mo</span></p>
+
+            {/* Net Disbursement */}
+            <div className="bg-emerald-50 rounded-2xl p-6 border border-emerald-100 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Net Disbursement</p>
+                <p className="text-[10px] text-emerald-600 italic">Direct to customer's account</p>
+              </div>
+              <p className="text-2xl font-black text-emerald-800">{fmt(netDisburse)}</p>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Button onClick={() => onComplete("accepted")} className="h-12 bg-[#004499] hover:bg-[#003377] font-bold text-base gap-2">
+        <div className="grid grid-cols-2 gap-4">
+          <Button onClick={() => onComplete("accepted")} className="h-14 bg-emerald-600 hover:bg-emerald-700 font-black uppercase tracking-widest shadow-xl shadow-emerald-100 gap-2">
             Accept Offer <ArrowRight className="h-5 w-5" />
           </Button>
-          <Button onClick={() => onComplete("want_more")} variant="outline" className="h-12 border-2 border-[#004499] text-[#004499] hover:bg-blue-50 font-bold gap-2">
+          <Button onClick={() => onComplete("want_more")} variant="outline" className="h-14 border-2 border-[#004499] text-[#004499] hover:bg-blue-50 font-black uppercase tracking-widest gap-2">
             <TrendingUp className="h-4 w-4" /> Want More
           </Button>
         </div>
