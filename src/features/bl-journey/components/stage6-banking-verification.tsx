@@ -259,7 +259,7 @@ export default function Stage6BankingVerification({ onComplete }: Props) {
                 <p className="text-xs font-black text-blue-200 uppercase tracking-widest mb-2">Estimated Monthly EMI</p>
                 <div className="text-5xl font-black">{fmt(emi)}<span className="text-lg font-bold opacity-60">/mo</span></div>
                 <div className="flex items-center gap-2 mt-4 text-[10px] font-bold text-blue-100 bg-blue-800/40 w-fit px-3 py-1 rounded-full border border-blue-700/50">
-                  <Clock className="h-3 w-3" /> FIXED INTEREST: 18% P.A.
+                  <Clock className="h-3 w-3" /> INTEREST: 18% P.A.
                 </div>
               </div>
             </div>

@@ -34,7 +34,9 @@ type BVPhase =
 interface Props {
   customerMobile?: string;
   customerName?: string;
+  stageNumber?: number;
   onComplete: () => void;
+  onBack?: () => void;
   onUpdateInsightBackend?: (activity: string, secondsLeft: number) => void;
   fastForwardTrigger?: number;
 }
@@ -42,7 +44,9 @@ interface Props {
 export default function Stage7BankingVerification({
   customerMobile = "9820012345",
   customerName = "Aarav Sharma",
+  stageNumber = 3,
   onComplete,
+  onBack,
   onUpdateInsightBackend,
   fastForwardTrigger,
 }: Props) {

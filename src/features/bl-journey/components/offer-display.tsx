@@ -105,7 +105,7 @@ export default function OfferDisplay({ onComplete }: OfferDisplayProps) {
               <div className="text-5xl font-bold text-emerald-800">
                 {formatCurrency(calculateEMI(amount[0], tenure[0]))}
               </div>
-              <p className="text-xs text-emerald-600 mt-4 font-medium">Interest Rate: 12% p.a. (Fixed)</p>
+              <p className="text-xs text-emerald-600 mt-4 font-medium">Interest Rate: 12% p.a.</p>
             </div>
 
             <div className="space-y-4">
@@ -234,7 +234,7 @@ export default function OfferDisplay({ onComplete }: OfferDisplayProps) {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-500 uppercase">Estimated EMI</p>
-                  <p className="text-xs text-slate-400 italic">@ 12% Fixed Interest</p>
+                  <p className="text-xs text-slate-400 italic">@ 12% Interest</p>
                 </div>
               </div>
               <div className="text-3xl font-black text-slate-900">

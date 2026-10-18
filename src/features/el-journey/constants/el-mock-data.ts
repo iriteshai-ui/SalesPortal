@@ -205,8 +205,8 @@ export const MOCK_EXISTING_EL_LEADS = [
     course: "MBA in International Business",
     institution: "IIM Ahmedabad",
     requestedAmount: 2200000,
-    stageId: 4, // Initial Offer
-    stageName: "Initial Offer",
+    stageId: 3, // Bureau-Based Offer
+    stageName: "Bureau-Based Offer",
     status: "Offer Ready",
     createdAt: "2024-10-15T10:30:00Z",
   },

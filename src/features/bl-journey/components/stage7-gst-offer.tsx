@@ -147,7 +147,7 @@ export default function Stage7GstOffer({ onComplete }: Props) {
           <div className="bg-blue-50 rounded-xl p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-slate-500">Monthly EMI</p>
-              <p className="text-xs text-slate-400">@ 18% Fixed p.a.</p>
+              <p className="text-xs text-slate-400">@ 18% p.a.</p>
             </div>
             <p className="text-3xl font-black text-slate-900">{fmt(emi)}<span className="text-xs font-medium text-slate-400 ml-1">/mo</span></p>
           </div>

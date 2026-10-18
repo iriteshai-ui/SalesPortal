@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -10,6 +11,8 @@ import {
   GraduationCap,
   Clock,
   Sparkles,
+  Sliders,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/utils";
 import ITBrandingIntro from "@/components/common/it-branding-intro";
@@ -18,10 +21,11 @@ import PFLStageLoader from "@/components/ui/pfl-stage-loader";
 // Stage components
 import Stage3BasicDetails from "./components/stage3-basic-details";
 import Stage4Consent from "./components/stage4-consent";
-import Stage5EmploymentVerification from "./components/stage5-employment-verification";
+import StageSimulationScreen from "./components/stage-simulation";
 import Stage6InitialOffer from "./components/stage6-initial-offer";
 import Stage7BankingVerification from "./components/stage7-banking-verification";
 import Stage8FinalOffer from "./components/stage8-final-offer";
+import Stage5EmploymentVerification from "./components/stage5-employment-verification";
 import Stage9CustomerTimeline from "./components/stage9-customer-timeline";
 import Stage10Disbursement from "./components/stage10-disbursement";
 
@@ -31,16 +35,22 @@ import {
   MOCK_EXISTING_EL_LEADS,
 } from "./constants/el-mock-data";
 
-export const EL_STAGES = [
-  { id: 1, title: "Customer Details" },
-  { id: 2, title: "Digital Consent" },
-  { id: 3, title: "Employment Verify" },
-  { id: 4, title: "Initial Offer" },
-  { id: 5, title: "Banking Verify" },
-  { id: 6, title: "Banking Offer" },
-  { id: 7, title: "Timeline" },
-  { id: 8, title: "Disbursement" },
-];
+export type StageKey =
+  | "details"
+  | "consent"
+  | "simulation"
+  | "bureau_offer"
+  | "banking_verify"
+  | "banking_offer"
+  | "employment_verify"
+  | "timeline"
+  | "disbursement";
+
+export interface StageDef {
+  key: StageKey;
+  title: string;
+  stepNumber: number;
+}
 
 export default function ElLeadJourneyPage() {
   const router = useRouter();
@@ -51,20 +61,97 @@ export default function ElLeadJourneyPage() {
   const initialRefParam = searchParams.get("ref");
   const initialMobileParam = searchParams.get("mobile");
   const initialCaseParam = searchParams.get("case");
+  const initialFlowParam = searchParams.get("offerFlow");
+  const initialEmpParam = searchParams.get("empVerify");
 
-  const [currentStep, setCurrentStep] = useState<number>(() => {
-    if (initialStageParam) {
-      const parsed = parseInt(initialStageParam, 10);
-      if (parsed >= 1 && parsed <= 8) return parsed;
+  // ── Simulation State (Controls Active Routing & Stepper) ──
+  const [offerFlow, setOfferFlow] = useState<"bureau" | "banking">(() => {
+    if (initialFlowParam === "banking") return "banking";
+    if (initialStageParam === "5" || initialStageParam === "6" || initialStageParam === "banking_verify" || initialStageParam === "banking_offer") {
+      return "banking";
     }
-    return 1; // Starts at Stage 1: Customer Details
+    return "bureau";
+  });
+
+  const [employmentRequired, setEmploymentRequired] = useState<boolean>(() => {
+    if (initialEmpParam === "no" || initialEmpParam === "false") return false;
+    return true;
+  });
+
+  // ── Dynamic Stepper Calculation ──
+  // Skips unselected stages so they are NOT rendered in the progress indicator
+  const activeStages = useMemo<StageDef[]>(() => {
+    const list: { key: StageKey; title: string }[] = [
+      { key: "details", title: "Customer Details" },
+      { key: "consent", title: "Digital Consent" },
+    ];
+
+    if (offerFlow === "bureau") {
+      // Case 1: Bureau-Based Offer (Skips Bank Verification & Banking Offer)
+      list.push({ key: "bureau_offer", title: "Bureau-Based Offer" });
+      if (employmentRequired) {
+        list.push({ key: "employment_verify", title: "Employment Verify" });
+      }
+    } else {
+      // Case 2: Banking Offer (Skips Bureau-Based Offer screen)
+      list.push({ key: "banking_verify", title: "Banking Verify" });
+      list.push({ key: "banking_offer", title: "Banking Offer" });
+      if (employmentRequired) {
+        list.push({ key: "employment_verify", title: "Employment Verify" });
+      }
+    }
+
+    list.push({ key: "timeline", title: "Timeline" });
+    list.push({ key: "disbursement", title: "Disbursement" });
+
+    return list.map((item, index) => ({
+      ...item,
+      stepNumber: index + 1,
+    }));
+  }, [offerFlow, employmentRequired]);
+
+  // Current Active Stage
+  const [currentStage, setCurrentStage] = useState<StageKey>(() => {
+    if (initialStageParam) {
+      if (initialStageParam === "simulation") return "simulation";
+      if (initialStageParam === "1") return "details";
+      if (initialStageParam === "2") return "consent";
+      if (initialStageParam === "3") {
+        return initialFlowParam === "banking" ? "banking_verify" : "bureau_offer";
+      }
+      if (initialStageParam === "4") return "employment_verify";
+      if (initialStageParam === "5") return "banking_verify";
+      if (initialStageParam === "6") return "banking_offer";
+      if (initialStageParam === "7") return "timeline";
+      if (initialStageParam === "8") return "disbursement";
+
+      // Direct string matching
+      const validKeys: StageKey[] = [
+        "details",
+        "consent",
+        "simulation",
+        "bureau_offer",
+        "banking_verify",
+        "banking_offer",
+        "employment_verify",
+        "timeline",
+        "disbursement",
+      ];
+      if (validKeys.includes(initialStageParam as StageKey)) {
+        return initialStageParam as StageKey;
+      }
+    }
+    return "details"; // Starts at Customer Details
   });
 
   const [showIntro, setShowIntro] = useState<boolean>(true);
-  const [pendingNextStep, setPendingNextStep] = useState<number | null>(null);
+  const [pendingNextStep, setPendingNextStep] = useState<StageKey | null>(null);
 
   // Application Reference & Customer Data
-  const appId = useMemo(() => initialRefParam || `EL-${Math.floor(Math.random() * 90000) + 10000}`, [initialRefParam]);
+  const appId = useMemo(
+    () => initialRefParam || `EL-${Math.floor(Math.random() * 90000) + 10000}`,
+    [initialRefParam]
+  );
   const MOCK_AGENT = { name: "Priya Sharma", code: "AG-DEL-1049" };
 
   const [customerData, setCustomerData] = useState<DemoProfile>(() => {
@@ -78,43 +165,51 @@ export default function ElLeadJourneyPage() {
   // Loader state
   const [isSimulatingLoader, setIsSimulatingLoader] = useState<boolean>(false);
 
-  // Stepper Calculation
-  const currentIdx = EL_STAGES.findIndex((s) => s.id === currentStep);
+  // Stepper calculations
+  const activeIdx = activeStages.findIndex((s) => s.key === currentStage);
+  const currentStepNumber = activeIdx >= 0 ? activeStages[activeIdx].stepNumber : 1;
   const progressPct =
-    currentIdx >= 0 ? Math.round(((currentIdx + 1) / EL_STAGES.length) * 100) : 0;
+    currentStage === "simulation"
+      ? Math.round((2 / activeStages.length) * 100)
+      : activeIdx >= 0
+      ? Math.round(((activeIdx + 1) / activeStages.length) * 100)
+      : 0;
 
   // Stage navigation
-  const goTo = (step: number) => {
-    setPendingNextStep(step);
+  const goTo = (stage: StageKey) => {
+    setPendingNextStep(stage);
   };
 
   const completeLoadingTransition = () => {
     if (pendingNextStep !== null) {
-      setCurrentStep(pendingNextStep);
+      setCurrentStage(pendingNextStep);
       setPendingNextStep(null);
       setIsSimulatingLoader(false);
     }
   };
 
-  // Stage Handlers
+  // ── Stage Handlers ──
   const handleStage1Complete = (data: DemoProfile) => {
     setCustomerData(data);
-    goTo(2);
+    goTo("consent");
   };
 
+  // When Consent is approved -> Proceed immediately to Simulation Screen!
   const handleStage2Complete = () => {
-    goTo(3); // To Stage 3: Employment Verification
+    goTo("simulation");
   };
 
-  const handleStage3Skip = () => {
-    goTo(4); // Skip Stage 3 -> directly to Stage 4: Initial Offer
+  // Simulation Screen Proceed Handler
+  const handleSimulationProceed = () => {
+    if (offerFlow === "bureau") {
+      goTo("bureau_offer");
+    } else {
+      goTo("banking_verify");
+    }
   };
 
-  const handleStage3Complete = () => {
-    goTo(4); // Complete Stage 3 -> to Stage 4: Initial Offer
-  };
-
-  const handleStage4ContinueWithOffer = (offerData?: any) => {
+  // Bureau-Based Offer: Continue with ₹5 Lakh
+  const handleBureauOfferContinueWithOffer = (offerData?: any) => {
     if (offerData) {
       setCustomerData((prev) => ({
         ...prev,
@@ -122,10 +217,15 @@ export default function ElLeadJourneyPage() {
         loanTenure: offerData.tenure,
       }));
     }
-    goTo(6); // Continue with this offer -> skips directly to Final Sanction (Stage 6)
+    if (employmentRequired) {
+      goTo("employment_verify");
+    } else {
+      goTo("timeline");
+    }
   };
 
-  const handleStage4ContinueForBanking = (offerData?: any) => {
+  // Bureau-Based Offer: Switch track to Banking Offer (₹15 Lakh)
+  const handleBureauOfferContinueForBanking = (offerData?: any) => {
     if (offerData) {
       setCustomerData((prev) => ({
         ...prev,
@@ -133,23 +233,55 @@ export default function ElLeadJourneyPage() {
         loanTenure: offerData.tenure,
       }));
     }
-    goTo(5); // Continue for Banking Offer -> proceeds to Banking Verify (Stage 5)
+    setOfferFlow("banking");
+    goTo("banking_verify");
   };
 
-  const handleStage4Edit = () => {
-    goTo(1); // Back to Customer Details
+  const handleBureauOfferContinue = () => {
+    if (employmentRequired) {
+      goTo("employment_verify");
+    } else {
+      goTo("timeline");
+    }
   };
 
-  const handleStage5Complete = () => {
-    goTo(6); // To Final Sanction (Stage 6)
+  const handleEditDetails = () => {
+    goTo("details");
   };
 
-  const handleStage6Complete = () => {
-    goTo(7); // To Timeline (Stage 7)
+  // Bank Verification Complete -> Display Banking Offer
+  const handleBankingVerifyComplete = () => {
+    goTo("banking_offer");
   };
 
-  const handleStage7Complete = () => {
-    goTo(8); // To Disbursement (Stage 8)
+  // Banking Offer: Accept Banking Offer
+  const handleBankingOfferContinue = () => {
+    if (employmentRequired) {
+      goTo("employment_verify");
+    } else {
+      goTo("timeline");
+    }
+  };
+
+  // Employment Verification: Skip or Complete
+  const handleEmploymentSkip = () => {
+    goTo("timeline");
+  };
+
+  const handleEmploymentComplete = () => {
+    goTo("timeline");
+  };
+
+  const handleEmploymentBack = () => {
+    if (offerFlow === "bureau") {
+      goTo("bureau_offer");
+    } else {
+      goTo("banking_offer");
+    }
+  };
+
+  const handleTimelineComplete = () => {
+    goTo("disbursement");
   };
 
   const handleFinishJourney = () => {
@@ -160,16 +292,19 @@ export default function ElLeadJourneyPage() {
   const handleResumeLead = (leadAppId: string) => {
     const found = MOCK_EXISTING_EL_LEADS.find((l) => l.appId === leadAppId);
     if (found) {
-      goTo(found.stageId);
+      if (found.stageId === 2) goTo("consent");
+      else if (found.stageId === 3) goTo("bureau_offer");
+      else if (found.stageId === 7) goTo("timeline");
+      else goTo("bureau_offer");
     } else {
-      goTo(4);
+      goTo("bureau_offer");
     }
   };
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
-      {/* ── Header (Exact Business Loan Layout) ── */}
-      <div className="mb-8">
+      {/* ── Header ── */}
+      <div className="mb-6">
         <Link href="/dashboard">
           <Button
             variant="ghost"
@@ -195,7 +330,24 @@ export default function ElLeadJourneyPage() {
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
-            {/* Agent Badge (Exact BL Style) */}
+            {/* Simulation Route Badge & Interactive Switcher */}
+            <button
+              type="button"
+              onClick={() => goTo("simulation")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-xs text-[#004499] font-bold transition-all shadow-2xs cursor-pointer group"
+              title="Click to configure journey path and verification rules"
+            >
+              <Sliders className="h-3.5 w-3.5 text-[#004499] group-hover:rotate-45 transition-transform" />
+              <span>
+                {offerFlow === "bureau" ? "Bureau Offer" : "Banking Offer"} • Emp:{" "}
+                {employmentRequired ? "Yes" : "No"}
+              </span>
+              <span className="text-[10px] uppercase font-semibold text-blue-500 underline ml-0.5">
+                (Change)
+              </span>
+            </button>
+
+            {/* Agent Badge */}
             <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
               <div className="w-7 h-7 rounded-full bg-[#004499]/10 flex items-center justify-center shrink-0">
                 <User className="h-4 w-4 text-[#004499]" />
@@ -226,7 +378,7 @@ export default function ElLeadJourneyPage() {
           </div>
         </div>
 
-        {/* ── Progress bar + Stepper (Exact BL Stepper Style) ── */}
+        {/* ── Progress bar + Dynamic Stepper (Skipped stages are completely excluded) ── */}
         <div className="relative py-6 px-2">
           <div className="absolute top-1/2 left-0 w-full h-1.5 bg-slate-100 -translate-y-1/2 rounded-full" />
           <div
@@ -235,12 +387,13 @@ export default function ElLeadJourneyPage() {
           />
 
           <div className="relative flex justify-between items-center">
-            {EL_STAGES.map((s) => {
-              const done = currentStep > s.id;
-              const active = currentStep === s.id;
+            {activeStages.map((s, idx) => {
+              const isSimulation = currentStage === "simulation";
+              const done = isSimulation ? idx < 2 : activeIdx > idx;
+              const active = isSimulation ? false : activeIdx === idx;
 
               return (
-                <div key={s.id} className="flex flex-col items-center group cursor-default">
+                <div key={s.key} className="flex flex-col items-center group cursor-default">
                   <div
                     className={cn(
                       "relative w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-500 z-10",
@@ -251,14 +404,14 @@ export default function ElLeadJourneyPage() {
                         : "bg-white border-slate-200 text-slate-300 scale-90"
                     )}
                   >
-                    {done ? <CheckCircle2 className="h-4 w-4" strokeWidth={3} /> : s.id}
+                    {done ? <CheckCircle2 className="h-4 w-4" strokeWidth={3} /> : s.stepNumber}
                     <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[9px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity z-20">
                       {s.title} • {done ? "Done" : active ? "Active" : "Upcoming"}
                     </div>
                   </div>
                   <span
                     className={cn(
-                      "mt-3 text-[9px] font-bold uppercase tracking-tighter transition-colors duration-300 max-w-[65px] text-center leading-tight",
+                      "mt-3 text-[9px] font-bold uppercase tracking-tighter transition-colors duration-300 max-w-[70px] text-center leading-tight",
                       active ? "text-[#004499]" : done ? "text-emerald-600" : "text-slate-400"
                     )}
                   >
@@ -271,7 +424,7 @@ export default function ElLeadJourneyPage() {
         </div>
       </div>
 
-      {/* ── Content Card (Exact BL Single Full-Width Container) ── */}
+      {/* ── Content Card Container ── */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 min-h-[500px]">
         {showIntro ? (
           <ITBrandingIntro
@@ -282,7 +435,8 @@ export default function ElLeadJourneyPage() {
           <PFLStageLoader onComplete={completeLoadingTransition} />
         ) : (
           <>
-            {currentStep === 1 && (
+            {/* Stage 1: Customer Details */}
+            {currentStage === "details" && (
               <Stage3BasicDetails
                 initialMobile={customerData.mobile}
                 initialCase={initialCaseParam}
@@ -292,7 +446,8 @@ export default function ElLeadJourneyPage() {
               />
             )}
 
-            {currentStep === 2 && (
+            {/* Stage 2: Digital Consent */}
+            {currentStage === "consent" && (
               <Stage4Consent
                 customerMobile={customerData.mobile}
                 customerName={customerData.fullName}
@@ -300,54 +455,82 @@ export default function ElLeadJourneyPage() {
               />
             )}
 
-            {currentStep === 3 && (
-              <Stage5EmploymentVerification
+            {/* Simulation Screen (Immediately After Consent Screen) */}
+            {currentStage === "simulation" && (
+              <StageSimulationScreen
                 customerData={customerData}
                 appId={appId}
-                onSkip={handleStage3Skip}
-                onComplete={handleStage3Complete}
-                onBack={() => goTo(2)}
+                offerFlow={offerFlow}
+                setOfferFlow={setOfferFlow}
+                employmentRequired={employmentRequired}
+                setEmploymentRequired={setEmploymentRequired}
+                onProceed={handleSimulationProceed}
+                onBack={() => goTo("consent")}
               />
             )}
 
-            {currentStep === 4 && (
+            {/* Bureau-Based Offer (Renamed from Initial Offer) */}
+            {currentStage === "bureau_offer" && (
               <Stage6InitialOffer
                 customerData={customerData}
                 appId={appId}
-                onContinueWithOffer={handleStage4ContinueWithOffer}
-                onContinueForBanking={handleStage4ContinueForBanking}
-                onContinue={() => goTo(5)}
-                onEditDetails={handleStage4Edit}
+                stageNumber={currentStepNumber}
+                onContinueWithOffer={handleBureauOfferContinueWithOffer}
+                onContinueForBanking={handleBureauOfferContinueForBanking}
+                onContinue={handleBureauOfferContinue}
+                onEditDetails={handleEditDetails}
+                onBackToSimulation={() => goTo("simulation")}
               />
             )}
 
-            {currentStep === 5 && (
+            {/* Banking Verification Stage */}
+            {currentStage === "banking_verify" && (
               <Stage7BankingVerification
                 customerMobile={customerData.mobile}
                 customerName={customerData.fullName}
-                onComplete={handleStage5Complete}
+                stageNumber={currentStepNumber}
+                onComplete={handleBankingVerifyComplete}
+                onBack={() => goTo("simulation")}
               />
             )}
 
-            {currentStep === 6 && (
+            {/* Banking Offer Screen */}
+            {currentStage === "banking_offer" && (
               <Stage8FinalOffer
                 customerData={customerData}
                 appId={appId}
-                onContinue={handleStage6Complete}
+                stageNumber={currentStepNumber}
+                employmentRequired={employmentRequired}
+                onContinue={handleBankingOfferContinue}
+                onBackToSimulation={() => goTo("simulation")}
                 isSimulatingLoader={isSimulatingLoader}
                 setIsSimulatingLoader={setIsSimulatingLoader}
               />
             )}
 
-            {currentStep === 7 && (
-              <Stage9CustomerTimeline
-                customerMobile={customerData.mobile}
-                customerName={customerData.fullName}
-                onComplete={handleStage7Complete}
+            {/* Employment Verification Stage */}
+            {currentStage === "employment_verify" && (
+              <Stage5EmploymentVerification
+                customerData={customerData}
+                appId={appId}
+                stageNumber={currentStepNumber}
+                onSkip={handleEmploymentSkip}
+                onComplete={handleEmploymentComplete}
+                onBack={handleEmploymentBack}
               />
             )}
 
-            {currentStep === 8 && (
+            {/* Customer Timeline Stage */}
+            {currentStage === "timeline" && (
+              <Stage9CustomerTimeline
+                customerMobile={customerData.mobile}
+                customerName={customerData.fullName}
+                onComplete={handleTimelineComplete}
+              />
+            )}
+
+            {/* Final Disbursement Stage */}
+            {currentStage === "disbursement" && (
               <Stage10Disbursement
                 appId={appId}
                 customerData={customerData}

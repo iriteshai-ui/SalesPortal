@@ -23,6 +23,7 @@ import {
   Info,
   Sparkles,
   RotateCcw,
+  Ban,
 } from "lucide-react";
 import { cn } from "@/utils";
 import { useToast } from "@/hooks/useToast";
@@ -219,6 +220,15 @@ export default function Stage3BasicDetails({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedCase !== "new") return;
+
+    if (formData.employmentType === "Self-employed") {
+      toast({
+        title: "Action Not Allowed",
+        description: "Education loan is not available for Self-employed applicants online. Please select Salaried to proceed.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const errors: Record<string, string> = {};
 
@@ -842,26 +852,39 @@ export default function Stage3BasicDetails({
               </div>
 
               {formData.employmentType === "Self-employed" && (
-                <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3.5 flex items-start gap-3 animate-in fade-in">
-                  <Info className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-                  <div className="text-xs text-amber-900 space-y-1">
-                    <p className="font-bold">Self-Employed Applicant Policy Note:</p>
+                <div className="bg-rose-50/90 border border-rose-200 rounded-xl p-4 flex items-start gap-3 animate-in fade-in">
+                  <AlertCircle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+                  <div className="text-xs text-rose-900 space-y-1">
+                    <p className="font-bold text-rose-700">Self-Employed Applicant Policy Restriction:</p>
                     <p>
-                      As per Pulse Education Loan guidelines, self-employed applicants undergo additional
-                      business stability & ITR banking assessment during verification. The application will
-                      proceed under configured business eligibility rules.
+                      Digital Education Loan application is currently available only for <strong>Salaried</strong> individuals.
+                      Applicants with Self-employed status cannot proceed to the next stage in this online journey.
+                    </p>
+                    <p className="text-rose-600 font-medium pt-0.5">
+                      Please select <strong>Salaried</strong> if eligible, or contact a branch representative for offline assisted loan options.
                     </p>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* ── Submit CTA (Exact BL Journey Button) ── */}
-            <div className="flex justify-end pt-4">
+            {/* ── Submit CTA ── */}
+            <div className="flex flex-col items-end gap-2 pt-4">
+              {formData.employmentType === "Self-employed" && (
+                <p className="text-xs font-semibold text-rose-600 flex items-center gap-1.5 animate-in fade-in">
+                  <Ban className="h-3.5 w-3.5" /> Save & Proceed disabled: Self-employed applicants are not eligible for digital education loans.
+                </p>
+              )}
               <Button
                 type="submit"
                 size="lg"
-                className="bg-[#004499] hover:bg-[#003377] text-white px-8 h-12 rounded-xl font-bold uppercase tracking-wider text-xs shadow-lg shadow-blue-100 gap-2 w-full md:w-auto"
+                disabled={formData.employmentType === "Self-employed"}
+                className={cn(
+                  "px-8 h-12 rounded-xl font-bold uppercase tracking-wider text-xs gap-2 w-full md:w-auto transition-all",
+                  formData.employmentType === "Self-employed"
+                    ? "bg-slate-200 text-slate-400 cursor-not-allowed hover:bg-slate-200 shadow-none border border-slate-300 pointer-events-none"
+                    : "bg-[#004499] hover:bg-[#003377] text-white shadow-lg shadow-blue-100"
+                )}
               >
                 Save & Proceed to Consent <ArrowRight className="h-4 w-4" />
               </Button>
