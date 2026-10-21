@@ -57,7 +57,7 @@ interface UploadedDocument {
 export default function Stage5EmploymentVerification({
   customerData,
   appId,
-  stageNumber = 4,
+  stageNumber = 3,
   onComplete,
   onSkip,
   onBack,
@@ -258,7 +258,7 @@ export default function Stage5EmploymentVerification({
           <div className="flex items-center gap-2">
             <span className="font-semibold text-slate-500">Current Stage:</span>
             <span className="font-bold text-slate-800 bg-white px-2.5 py-1 rounded border border-slate-200">
-              Stage 4 — Employment Verification
+              Stage {stageNumber} — Employment Verification
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -306,8 +306,8 @@ export default function Stage5EmploymentVerification({
                   </Badge>
                 </div>
                 <div>
-                  <h4 className="text-base font-bold text-slate-900 group-hover:text-[#004499] transition-colors">
-                    Yes — Continue to Stage 4
+                  <h4 className="font-bold text-slate-900 group-hover:text-[#004499] transition-colors">
+                    Yes — Continue to Stage {stageNumber}
                   </h4>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                     Verify employment using Salary Slips, EPFO UAN inquiry, or customer official email OTP.

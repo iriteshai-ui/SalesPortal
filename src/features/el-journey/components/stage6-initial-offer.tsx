@@ -11,7 +11,6 @@ import {
   Percent,
   Receipt,
   ShieldCheck,
-  TrendingUp,
   User,
   Coins,
 } from "lucide-react";
@@ -86,27 +85,6 @@ export default function Stage6InitialOffer({
     }
   };
 
-  const handleContinueForBanking = () => {
-    const offerData = {
-      amount: loanAmount,
-      tenure: tenureMonths,
-      emi: currentEmi,
-      netDisbursement,
-      totalAmount,
-      interestRate,
-      processingFee,
-      gst,
-      stampDuty,
-      totalDeductions,
-      offerType: "banking",
-    };
-    if (onContinueForBanking) {
-      onContinueForBanking(offerData);
-    } else if (onContinue) {
-      onContinue();
-    }
-  };
-
   return (
     <div className="bg-[#F4F6F9] -m-4 sm:-m-6 p-4 sm:p-6 rounded-2xl space-y-5 animate-in fade-in duration-300">
       {/* ── TOP HEADER ── */}
@@ -114,20 +92,20 @@ export default function Stage6InitialOffer({
         <div className="space-y-1.5">
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className="text-xs font-black uppercase tracking-wider text-[#004499]">
-              Stage {stageNumber || 3} • Bureau Assessment & Pre-Approval
+              Stage {stageNumber || 3} • Final Offer Assessment
             </span>
             <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-emerald-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
               <CheckCircle2 className="h-3 w-3 text-emerald-600 shrink-0" />
-              Bureau-Based Offer Unlocked
+              Final Offer Unlocked
             </Badge>
           </div>
 
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
-            Bureau-Based Loan Offer — ₹5,00,000
+            Final Offer — ₹5,00,000
           </h2>
 
           <p className="text-xs sm:text-sm text-slate-500 max-w-3xl leading-relaxed">
-            Pre-approved bureau sanction based on applicant profile. Review terms or proceed to Banking Verification to qualify for up to ₹15 Lakh.
+            Final loan sanction based on applicant profile. Review terms and select offer to send the customer DIY journey link.
           </p>
         </div>
 
@@ -181,18 +159,6 @@ export default function Stage6InitialOffer({
                 </p>
               </div>
             </div>
-
-            <div className="pt-1 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2">
-              <Badge
-                variant="outline"
-                className="text-[11px] font-semibold bg-blue-50/70 text-[#004499] border-blue-200 px-2.5 py-0.5 rounded-lg"
-              >
-                Admission: {customerData.admissionStatus || "Confirmed Admission"}
-              </Badge>
-              <span className="text-[11px] text-slate-400 font-medium">
-                Target Intake: Fall 2026
-              </span>
-            </div>
           </div>
 
           {/* CARD 2: Loan Summary & Parameter Highlights (Tenure shown ONCE only) */}
@@ -216,7 +182,7 @@ export default function Stage6InitialOffer({
                 <p className="text-2xl font-black text-[#004499] font-mono tracking-tight">
                   {formatCurrency(loanAmount)}
                 </p>
-                <p className="text-[10px] text-slate-400 font-medium">Pre-approved Bureau Cap</p>
+                <p className="text-[10px] text-slate-400 font-medium">Final Sanction Cap</p>
               </div>
 
               {/* Tenure Box (Single unique display of tenure) */}
@@ -231,7 +197,7 @@ export default function Stage6InitialOffer({
               </div>
             </div>
 
-            {/* Interest Rate with Tag */}
+            {/* Interest Rate */}
             <div className="bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/80 flex items-center justify-between">
               <div className="space-y-0.5">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -240,11 +206,8 @@ export default function Stage6InitialOffer({
                 <p className="text-xl font-black text-slate-900 font-mono">
                   {interestRate}% <span className="text-xs font-normal text-slate-500">p.a.</span>
                 </p>
-                <p className="text-[10px] text-slate-400">Monthly reducing balance calculation</p>
+                <p className="text-[10px] text-slate-400">Fixed rate of interest</p>
               </div>
-              <Badge className="bg-slate-200/80 text-slate-700 hover:bg-slate-200/80 border-slate-300 text-[10px] font-bold px-2.5 py-1 rounded-md">
-                Reducing Rate
-              </Badge>
             </div>
           </div>
 
@@ -415,31 +378,21 @@ export default function Stage6InitialOffer({
         </div>
       </div>
 
-      {/* ── BOTTOM ACTION FOOTER (FULL WIDTH, ONLY THE 2 CTAs) ── */}
-      <div className="pt-2">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* CTA 1: Continue with Bureau-Based offer */}
-          <Button
-            type="button"
-            onClick={handleContinueWithOffer}
-            className="h-14 sm:h-16 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-wider text-xs sm:text-sm rounded-2xl shadow-xl shadow-emerald-200/50 flex items-center justify-center gap-2 group transition-all cursor-pointer"
-          >
-            <CheckCircle2 className="h-4 w-4 shrink-0" />
-            <span>CONTINUE WITH BUREAU-BASED ₹5 LAKH OFFER</span>
-            <ArrowRight className="h-4 w-4 opacity-80 group-hover:translate-x-1 transition-transform shrink-0" />
-          </Button>
-
-          {/* CTA 2: Continue for Banking Offer */}
-          <Button
-            type="button"
-            onClick={handleContinueForBanking}
-            className="h-14 sm:h-16 w-full bg-[#004499] hover:bg-[#003377] text-white font-black uppercase tracking-wider text-xs sm:text-sm rounded-2xl shadow-xl shadow-blue-200/50 flex items-center justify-center gap-2 group transition-all cursor-pointer"
-          >
-            <TrendingUp className="h-4 w-4 shrink-0" />
-            <span>CONTINUE FOR BANKING OFFER (₹15 LAKH)</span>
-            <ArrowRight className="h-4 w-4 opacity-80 group-hover:translate-x-1 transition-transform shrink-0" />
-          </Button>
+      {/* ── BOTTOM ACTION FOOTER (SINGLE PRIMARY CTA) ── */}
+      <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="text-xs text-slate-500">
+          Pre-Approved Sanction Ref: <span className="font-mono font-bold text-slate-700">PRE-SANCT-{appId}-B1</span>
         </div>
+
+        <Button
+          type="button"
+          onClick={handleContinueWithOffer}
+          className="h-12 sm:h-14 px-8 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-wider text-xs sm:text-sm rounded-2xl shadow-xl shadow-emerald-200/50 flex items-center justify-center gap-2.5 group transition-all cursor-pointer w-full sm:w-auto"
+        >
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
+          <span>Select Offer & Send DIY Journey Link</span>
+          <ArrowRight className="h-4 w-4 opacity-80 group-hover:translate-x-1 transition-transform shrink-0" />
+        </Button>
       </div>
     </div>
   );

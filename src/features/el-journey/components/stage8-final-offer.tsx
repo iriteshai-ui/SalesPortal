@@ -135,7 +135,7 @@ export default function Stage8FinalOffer({
           </div>
         </div>
         <div className="text-center space-y-1">
-          <h3 className="text-xl font-bold text-slate-900">Structuring Enhanced Banking Offer…</h3>
+          <h3 className="text-xl font-bold text-slate-900">Structuring Final Offer…</h3>
           <p className="text-xs text-slate-500 max-w-md">
             Analyzing verified Account Aggregator transaction flows, salary stability, and credit FOIR metrics…
           </p>
@@ -147,7 +147,7 @@ export default function Stage8FinalOffer({
           onClick={() => setCountdown(0)}
           className="text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200"
         >
-          <Zap className="h-3.5 w-3.5 text-emerald-600 fill-emerald-600 mr-1" /> View Banking Offer Instantly
+          <Zap className="h-3.5 w-3.5 text-emerald-600 fill-emerald-600 mr-1" /> View Final Offer Instantly
         </Button>
       </div>
     );
@@ -160,14 +160,14 @@ export default function Stage8FinalOffer({
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
-              Stage {stageNumber} • Formal Banking Sanction Approved
+              Stage {stageNumber} • Formal Sanction Approved
             </span>
             <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 text-[10px] font-bold px-2 py-0.5">
               <Award className="h-3 w-3 mr-1 text-emerald-700 inline" /> Sanction Approved
             </Badge>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-0.5">
-            Banking Offer — ₹15,00,000
+            Final Offer — ₹15,00,000
           </h2>
           <p className="text-xs text-slate-500 mt-0.5 max-w-2xl">
             Enhanced sanction terms underwritten against verified Account Aggregator banking records and cash flows for{" "}
@@ -206,12 +206,6 @@ export default function Stage8FinalOffer({
                 {customerData.institutionName || "Indian Institute of Science (IISc) / BITS Pilani"}
               </p>
             </div>
-
-            <div className="flex flex-wrap gap-2 pt-0.5">
-              <Badge variant="outline" className="text-[10px] bg-slate-50 text-slate-700 border-slate-200">
-                Admission: {customerData.admissionStatus || "Confirmed Admission"}
-              </Badge>
-            </div>
           </div>
 
           {/* Sanctioned Offer Parameters Grid */}
@@ -225,13 +219,13 @@ export default function Stage8FinalOffer({
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                    <Banknote className="h-3 w-3 text-emerald-600" /> Banking Sanction
+                    <Banknote className="h-3 w-3 text-emerald-600" /> Sanction Amount
                   </span>
                 </div>
                 <p className="text-xl font-black text-emerald-700 font-mono">
                   {formatCurrency(loanAmount)}
                 </p>
-                <p className="text-[10px] text-slate-400">Enhanced Banking Offer Cap</p>
+                <p className="text-[10px] text-slate-400">Final Sanction Cap</p>
               </div>
 
               {/* Repayment Tenure */}
@@ -448,13 +442,11 @@ export default function Stage8FinalOffer({
         <Button
           type="button"
           onClick={onContinue}
-          className="h-12 sm:h-14 px-8 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-wider text-xs sm:text-sm rounded-2xl shadow-xl shadow-emerald-100 flex items-center justify-center gap-2 group transition-all cursor-pointer w-full sm:w-auto"
+          className="h-12 sm:h-14 px-8 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-wider text-xs sm:text-sm rounded-2xl shadow-xl shadow-emerald-200/50 flex items-center justify-center gap-2.5 group transition-all cursor-pointer w-full sm:w-auto"
         >
-          <CheckCircle2 className="h-4 w-4" />
-          {employmentRequired
-            ? "Accept Banking Offer & Proceed to Employment Verification"
-            : "Accept Banking Offer & SEND DIY JOURNEY LINK TO THE CUSTOMER"}
-          <ArrowRight className="h-4 w-4 opacity-70 group-hover:translate-x-1 transition-transform" />
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
+          <span>Select Offer & Send DIY Journey Link</span>
+          <ArrowRight className="h-4 w-4 opacity-80 group-hover:translate-x-1 transition-transform shrink-0" />
         </Button>
       </div>
     </div>

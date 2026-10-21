@@ -89,12 +89,12 @@ export default function StageSimulationScreen({
             </p>
           </div>
           <Badge variant="outline" className="text-[10px] font-bold text-[#004499] border-blue-200 bg-blue-50">
-            Selected: {offerFlow === "bureau" ? "Bureau-Based Offer" : "Banking Offer"}
+            Selected: {offerFlow === "bureau" ? "Final Offer (Bureau Track)" : "Final Offer (Banking Track)"}
           </Badge>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Card A: Bureau-Based Offer */}
+          {/* Card A: Final Offer (Bureau Track) */}
           <div
             onClick={() => setOfferFlow("bureau")}
             className={cn(
@@ -117,8 +117,8 @@ export default function StageSimulationScreen({
                   <FileCheck className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="font-black text-slate-900 text-base">Bureau-Based Offer</h4>
-                  <p className="text-[11px] text-slate-500">Renamed Initial Bureau Sanction</p>
+                  <h4 className="font-black text-slate-900 text-base">Final Offer (Bureau)</h4>
+                  <p className="text-[11px] text-slate-500">Bureau-Based Sanction</p>
                 </div>
               </div>
 
@@ -185,7 +185,7 @@ export default function StageSimulationScreen({
                   <Building2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="font-black text-slate-900 text-base">Banking Offer</h4>
+                  <h4 className="font-black text-slate-900 text-base">Final Offer (Banking)</h4>
                   <p className="text-[11px] text-slate-500">Enhanced Bank Statement Sanction</p>
                 </div>
               </div>
@@ -225,7 +225,7 @@ export default function StageSimulationScreen({
             <div className="text-[11px] text-slate-500 flex items-center gap-1.5 pt-1">
               <TrendingUp className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
               <span>
-                <strong>Behavior:</strong> Skips Bureau-Based Offer screen; proceeds directly to Bank Verification.
+                <strong>Behavior:</strong> Proceeds directly to Bank Verification, unlocking enhanced Final Offer.
               </span>
             </div>
           </div>
@@ -355,47 +355,33 @@ export default function StageSimulationScreen({
           <ArrowRight className="h-3 w-3 text-slate-400 shrink-0" />
 
           {/* Conditional Steps */}
-          {offerFlow === "bureau" ? (
+          {employmentRequired && (
             <>
-              {/* Bureau-Based Offer */}
               <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 border border-blue-300 rounded-lg text-[#004499] font-bold shrink-0 ring-1 ring-blue-300">
-                <FileCheck className="h-3.5 w-3.5 text-[#004499]" />
-                3. Bureau-Based Offer
+                <Briefcase className="h-3.5 w-3.5 text-[#004499]" />
+                3. Employment Verify
               </div>
-
-              {employmentRequired && (
-                <>
-                  <ArrowRight className="h-3 w-3 text-slate-400 shrink-0" />
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-800 font-medium shrink-0">
-                    <Briefcase className="h-3.5 w-3.5 text-[#004499]" />
-                    4. Employment Verify
-                  </div>
-                </>
-              )}
+              <ArrowRight className="h-3 w-3 text-slate-400 shrink-0" />
             </>
+          )}
+
+          {offerFlow === "bureau" ? (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100/80 border border-emerald-300 rounded-lg text-emerald-900 font-bold shrink-0">
+              <Award className="h-3.5 w-3.5 text-emerald-700" />
+              {employmentRequired ? "4. Final Offer" : "3. Final Offer"}
+            </div>
           ) : (
             <>
-              {/* Banking Flow */}
               <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 border border-blue-300 rounded-lg text-[#004499] font-bold shrink-0 ring-1 ring-blue-300">
                 <Building2 className="h-3.5 w-3.5 text-[#004499]" />
-                3. Banking Verify
+                {employmentRequired ? "4. Banking Verify" : "3. Banking Verify"}
               </div>
 
               <ArrowRight className="h-3 w-3 text-slate-400 shrink-0" />
               <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100/80 border border-emerald-300 rounded-lg text-emerald-900 font-bold shrink-0">
                 <Award className="h-3.5 w-3.5 text-emerald-700" />
-                4. Banking Offer
+                {employmentRequired ? "5. Final Offer" : "4. Final Offer"}
               </div>
-
-              {employmentRequired && (
-                <>
-                  <ArrowRight className="h-3 w-3 text-slate-400 shrink-0" />
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-800 font-medium shrink-0">
-                    <Briefcase className="h-3.5 w-3.5 text-[#004499]" />
-                    5. Employment Verify
-                  </div>
-                </>
-              )}
             </>
           )}
 
@@ -421,12 +407,12 @@ export default function StageSimulationScreen({
                     Bank Verification
                   </Badge>
                   <Badge variant="outline" className="text-[10px] bg-red-50 text-red-700 border-red-200 line-through">
-                    Banking Offer
+                    Final Offer (Banking)
                   </Badge>
                 </>
               ) : (
                 <Badge variant="outline" className="text-[10px] bg-red-50 text-red-700 border-red-200 line-through">
-                  Bureau-Based Offer
+                  Final Offer (Bureau)
                 </Badge>
               )}
               {!employmentRequired && (
@@ -464,9 +450,11 @@ export default function StageSimulationScreen({
           )}
         >
           <span>
-            {offerFlow === "bureau"
-              ? "Proceed to Bureau-Based Offer (₹5 Lakh)"
-              : "Proceed to Bank Verification "}
+            {employmentRequired
+              ? "Proceed to Employment Verification"
+              : offerFlow === "bureau"
+              ? "Proceed to Final Offer (₹5 Lakh)"
+              : "Proceed to Bank Verification"}
           </span>
           <ArrowRight className="h-4 w-4 opacity-80 group-hover:translate-x-1 transition-transform" />
         </Button>

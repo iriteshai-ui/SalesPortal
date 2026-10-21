@@ -16,3 +16,5 @@ replit.md
 out/
 build/
 *.tsbuildinfo
+recordings/
+*.webm

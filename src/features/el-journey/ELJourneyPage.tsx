@@ -13,6 +13,13 @@ import {
   Sparkles,
   Sliders,
   Zap,
+  Check,
+  ShieldCheck,
+  Briefcase,
+  Building2,
+  Award,
+  Send,
+  Banknote,
 } from "lucide-react";
 import { cn } from "@/utils";
 import ITBrandingIntro from "@/components/common/it-branding-intro";
@@ -52,6 +59,115 @@ export interface StageDef {
   stepNumber: number;
 }
 
+export interface StageMetadata {
+  title: string;
+  shortTitle: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  accentColor: string;
+  bgLight: string;
+  textLight: string;
+  borderLight: string;
+}
+
+export const STAGE_CONFIG: Record<StageKey, StageMetadata> = {
+  details: {
+    title: "Customer Details",
+    shortTitle: "Details",
+    description: "Applicant KYC, mobile & personal information",
+    icon: User,
+    accentColor: "#004499",
+    bgLight: "bg-blue-50",
+    textLight: "text-blue-600",
+    borderLight: "border-blue-200",
+  },
+  consent: {
+    title: "Digital Consent",
+    shortTitle: "Consent",
+    description: "Customer OTP consent for CIBIL & CKYC fetch",
+    icon: ShieldCheck,
+    accentColor: "#4f46e5",
+    bgLight: "bg-indigo-50",
+    textLight: "text-indigo-600",
+    borderLight: "border-indigo-200",
+  },
+  employment_verify: {
+    title: "Employment Verify",
+    shortTitle: "Employment",
+    description: "Employer verification & salary validation",
+    icon: Briefcase,
+    accentColor: "#d97706",
+    bgLight: "bg-amber-50",
+    textLight: "text-amber-600",
+    borderLight: "border-amber-200",
+  },
+  banking_verify: {
+    title: "Banking Verify",
+    shortTitle: "Banking",
+    description: "Net banking statement fetch & salary records",
+    icon: Building2,
+    accentColor: "#0284c7",
+    bgLight: "bg-sky-50",
+    textLight: "text-sky-600",
+    borderLight: "border-sky-200",
+  },
+  bureau_offer: {
+    title: "Final Offer",
+    shortTitle: "Offer",
+    description: "Pre-approved loan sanction cap & tenure selection",
+    icon: Award,
+    accentColor: "#059669",
+    bgLight: "bg-emerald-50",
+    textLight: "text-emerald-600",
+    borderLight: "border-emerald-200",
+  },
+  banking_offer: {
+    title: "Final Offer",
+    shortTitle: "Offer",
+    description: "Sanctioned loan offer, interest rate & EMI schedule",
+    icon: Award,
+    accentColor: "#059669",
+    bgLight: "bg-emerald-50",
+    textLight: "text-emerald-600",
+    borderLight: "border-emerald-200",
+  },
+  timeline: {
+    title: "Timeline",
+    shortTitle: "DIY Link",
+    description: "Send DIY Journey link & track onboarding stages",
+    icon: Send,
+    accentColor: "#7c3aed",
+    bgLight: "bg-violet-50",
+    textLight: "text-violet-600",
+    borderLight: "border-violet-200",
+  },
+  disbursement: {
+    title: "Disbursement",
+    shortTitle: "Payout",
+    description: "Loan agreement sign-off and fund disbursement",
+    icon: Banknote,
+    accentColor: "#0d9488",
+    bgLight: "bg-teal-50",
+    textLight: "text-teal-600",
+    borderLight: "border-teal-200",
+  },
+  simulation: {
+    title: "Route Simulator",
+    shortTitle: "Simulator",
+    description: "Configure journey parameters and underwriting flow",
+    icon: Sliders,
+    accentColor: "#64748b",
+    bgLight: "bg-slate-50",
+    textLight: "text-slate-600",
+    borderLight: "border-slate-200",
+  },
+};
+
+const getStageIcon = (key: StageKey, className: string = "h-4 w-4") => {
+  const IconComp = STAGE_CONFIG[key]?.icon || Sparkles;
+  return <IconComp className={className} />;
+};
+
 export default function ElLeadJourneyPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -86,19 +202,17 @@ export default function ElLeadJourneyPage() {
       { key: "consent", title: "Digital Consent" },
     ];
 
+    if (employmentRequired) {
+      list.push({ key: "employment_verify", title: "Employment Verify" });
+    }
+
     if (offerFlow === "bureau") {
       // Case 1: Bureau-Based Offer (Skips Bank Verification & Banking Offer)
-      list.push({ key: "bureau_offer", title: "Bureau-Based Offer" });
-      if (employmentRequired) {
-        list.push({ key: "employment_verify", title: "Employment Verify" });
-      }
+      list.push({ key: "bureau_offer", title: "Final Offer" });
     } else {
       // Case 2: Banking Offer (Skips Bureau-Based Offer screen)
       list.push({ key: "banking_verify", title: "Banking Verify" });
-      list.push({ key: "banking_offer", title: "Banking Offer" });
-      if (employmentRequired) {
-        list.push({ key: "employment_verify", title: "Employment Verify" });
-      }
+      list.push({ key: "banking_offer", title: "Final Offer" });
     }
 
     list.push({ key: "timeline", title: "Timeline" });
@@ -116,14 +230,15 @@ export default function ElLeadJourneyPage() {
       if (initialStageParam === "simulation") return "simulation";
       if (initialStageParam === "1") return "details";
       if (initialStageParam === "2") return "consent";
-      if (initialStageParam === "3") {
+      if (initialStageParam === "3") return "employment_verify";
+      if (initialStageParam === "4") {
         return initialFlowParam === "banking" ? "banking_verify" : "bureau_offer";
       }
-      if (initialStageParam === "4") return "employment_verify";
-      if (initialStageParam === "5") return "banking_verify";
-      if (initialStageParam === "6") return "banking_offer";
-      if (initialStageParam === "7") return "timeline";
-      if (initialStageParam === "8") return "disbursement";
+      if (initialStageParam === "5") {
+        return initialFlowParam === "banking" ? "banking_offer" : "timeline";
+      }
+      if (initialStageParam === "6") return "timeline";
+      if (initialStageParam === "7") return "disbursement";
 
       // Direct string matching
       const validKeys: StageKey[] = [
@@ -201,14 +316,18 @@ export default function ElLeadJourneyPage() {
 
   // Simulation Screen Proceed Handler
   const handleSimulationProceed = () => {
-    if (offerFlow === "bureau") {
-      goTo("bureau_offer");
+    if (employmentRequired) {
+      goTo("employment_verify");
     } else {
-      goTo("banking_verify");
+      if (offerFlow === "bureau") {
+        goTo("bureau_offer");
+      } else {
+        goTo("banking_verify");
+      }
     }
   };
 
-  // Bureau-Based Offer: Continue with ₹5 Lakh
+  // Final Offer (Bureau Track): Continue with ₹5 Lakh -> proceeds directly to Timeline
   const handleBureauOfferContinueWithOffer = (offerData?: any) => {
     if (offerData) {
       setCustomerData((prev) => ({
@@ -217,14 +336,10 @@ export default function ElLeadJourneyPage() {
         loanTenure: offerData.tenure,
       }));
     }
-    if (employmentRequired) {
-      goTo("employment_verify");
-    } else {
-      goTo("timeline");
-    }
+    goTo("timeline");
   };
 
-  // Bureau-Based Offer: Switch track to Banking Offer (₹15 Lakh)
+  // Final Offer (Bureau Track): Switch track to Banking Offer (₹15 Lakh)
   const handleBureauOfferContinueForBanking = (offerData?: any) => {
     if (offerData) {
       setCustomerData((prev) => ({
@@ -238,46 +353,42 @@ export default function ElLeadJourneyPage() {
   };
 
   const handleBureauOfferContinue = () => {
-    if (employmentRequired) {
-      goTo("employment_verify");
-    } else {
-      goTo("timeline");
-    }
+    goTo("timeline");
   };
 
   const handleEditDetails = () => {
     goTo("details");
   };
 
-  // Bank Verification Complete -> Display Banking Offer
+  // Bank Verification Complete -> Display Final Offer
   const handleBankingVerifyComplete = () => {
     goTo("banking_offer");
   };
 
-  // Banking Offer: Accept Banking Offer
+  // Final Offer (Banking Track): Accept Banking Offer -> proceeds directly to Timeline
   const handleBankingOfferContinue = () => {
-    if (employmentRequired) {
-      goTo("employment_verify");
-    } else {
-      goTo("timeline");
-    }
+    goTo("timeline");
   };
 
-  // Employment Verification: Skip or Complete
+  // Employment Verification (Stage 3): Skip or Complete -> proceed to Offer track
   const handleEmploymentSkip = () => {
-    goTo("timeline");
-  };
-
-  const handleEmploymentComplete = () => {
-    goTo("timeline");
-  };
-
-  const handleEmploymentBack = () => {
     if (offerFlow === "bureau") {
       goTo("bureau_offer");
     } else {
-      goTo("banking_offer");
+      goTo("banking_verify");
     }
+  };
+
+  const handleEmploymentComplete = () => {
+    if (offerFlow === "bureau") {
+      goTo("bureau_offer");
+    } else {
+      goTo("banking_verify");
+    }
+  };
+
+  const handleEmploymentBack = () => {
+    goTo("simulation");
   };
 
   const handleTimelineComplete = () => {
@@ -293,11 +404,12 @@ export default function ElLeadJourneyPage() {
     const found = MOCK_EXISTING_EL_LEADS.find((l) => l.appId === leadAppId);
     if (found) {
       if (found.stageId === 2) goTo("consent");
-      else if (found.stageId === 3) goTo("bureau_offer");
+      else if (found.stageId === 3) goTo("employment_verify");
+      else if (found.stageId === 4) goTo(offerFlow === "banking" ? "banking_verify" : "bureau_offer");
       else if (found.stageId === 7) goTo("timeline");
-      else goTo("bureau_offer");
+      else goTo("employment_verify");
     } else {
-      goTo("bureau_offer");
+      goTo("employment_verify");
     }
   };
 
@@ -339,7 +451,7 @@ export default function ElLeadJourneyPage() {
             >
               <Sliders className="h-3.5 w-3.5 text-[#004499] group-hover:rotate-45 transition-transform" />
               <span>
-                {offerFlow === "bureau" ? "Bureau Offer" : "Banking Offer"} • Emp:{" "}
+                {offerFlow === "bureau" ? "Final Offer (₹5L)" : "Final Offer (₹15L)"} • Emp:{" "}
                 {employmentRequired ? "Yes" : "No"}
               </span>
               <span className="text-[10px] uppercase font-semibold text-blue-500 underline ml-0.5">
@@ -378,48 +490,192 @@ export default function ElLeadJourneyPage() {
           </div>
         </div>
 
-        {/* ── Progress bar + Dynamic Stepper (Skipped stages are completely excluded) ── */}
-        <div className="relative py-6 px-2">
-          <div className="absolute top-1/2 left-0 w-full h-1.5 bg-slate-100 -translate-y-1/2 rounded-full" />
-          <div
-            className="absolute top-1/2 left-0 h-1.5 bg-emerald-500 -translate-y-1/2 transition-all duration-700 ease-in-out rounded-full shadow-[0_0_10px_rgba(16,185,129,0.3)]"
-            style={{ width: `${progressPct}%` }}
-          />
+        {/* ── Progress bar + Dynamic Stepper (Interactive with Stage Icons & Tooltips) ── */}
+        <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5 mb-6 relative z-30 overflow-visible transition-all duration-300 hover:shadow-md">
+          {/* Ambient top border gradient */}
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 rounded-t-2xl" />
 
-          <div className="relative flex justify-between items-center">
-            {activeStages.map((s, idx) => {
-              const isSimulation = currentStage === "simulation";
-              const done = isSimulation ? idx < 2 : activeIdx > idx;
-              const active = isSimulation ? false : activeIdx === idx;
+          {/* Stepper Header Summary Bar */}
+          <div className="flex items-center justify-between pb-3.5 mb-2 border-b border-slate-100 flex-wrap gap-2 text-xs">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="flex h-2.5 w-2.5 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#004499] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#004499]"></span>
+              </span>
+              <span className="font-bold text-slate-800">
+                Stage {currentStepNumber} of {activeStages.length}:
+              </span>
+              <span className="inline-flex items-center gap-1.5 font-bold text-[#004499] bg-blue-50 px-2.5 py-0.5 rounded-lg border border-blue-200/70 shadow-2xs">
+                {getStageIcon(currentStage, "h-3.5 w-3.5 text-[#004499]")}
+                <span>{STAGE_CONFIG[currentStage]?.title || "Current Stage"}</span>
+              </span>
+              <span className="hidden sm:inline text-slate-300">•</span>
+              <span className="hidden md:inline text-slate-500 font-medium text-[11px]">
+                {STAGE_CONFIG[currentStage]?.description}
+              </span>
+            </div>
 
-              return (
-                <div key={s.key} className="flex flex-col items-center group cursor-default">
+            <div className="flex items-center gap-2.5 ml-auto text-[11px]">
+              <span className="text-slate-400 hidden lg:inline">
+                💡 Click completed stage to review
+              </span>
+              <div className="flex items-center gap-1.5 bg-slate-100/90 text-slate-700 px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold border border-slate-200">
+                <Sparkles className="h-3 w-3 text-amber-500" />
+                <span>{progressPct}% Completed</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative pt-10 pb-2 px-2 sm:px-6">
+            {/* Background connecting track perfectly centered through icon nodes */}
+            <div className="absolute top-[64px] sm:top-[66px] left-8 sm:left-12 right-8 sm:right-12 h-2 bg-slate-100 rounded-full border border-slate-200/60 -translate-y-1/2" />
+            
+            {/* Animated gradient progress fill line */}
+            <div
+              className="absolute top-[64px] sm:top-[66px] left-8 sm:left-12 h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-[#004499] -translate-y-1/2 transition-all duration-700 ease-in-out rounded-full shadow-[0_0_12px_rgba(16,185,129,0.35)]"
+              style={{ width: `${Math.min(progressPct, 95)}%` }}
+            />
+
+            <div className="relative flex justify-between items-start">
+              {activeStages.map((s, idx) => {
+                const isSimulation = currentStage === "simulation";
+                const done = isSimulation ? idx < 2 : activeIdx > idx;
+                const active = isSimulation ? false : activeIdx === idx;
+                const meta = STAGE_CONFIG[s.key];
+
+                return (
                   <div
+                    key={s.key}
+                    onClick={() => {
+                      if (done) goTo(s.key);
+                    }}
                     className={cn(
-                      "relative w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-500 z-10",
-                      done
-                        ? "bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-100"
-                        : active
-                        ? "bg-white border-[#004499] text-[#004499] ring-4 ring-blue-50 scale-110 shadow-md"
-                        : "bg-white border-slate-200 text-slate-300 scale-90"
+                      "flex flex-col items-center group relative select-none transition-all duration-300",
+                      done ? "cursor-pointer" : "cursor-default"
                     )}
                   >
-                    {done ? <CheckCircle2 className="h-4 w-4" strokeWidth={3} /> : s.stepNumber}
-                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[9px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity z-20">
-                      {s.title} • {done ? "Done" : active ? "Active" : "Upcoming"}
+                    {/* Floating Interactive Tooltip positioned cleanly in the upper clear zone */}
+                    <div className="absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white py-1.5 px-3 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 pointer-events-none transition-all duration-200 z-50 border border-slate-700/60 flex flex-col items-center gap-0.5 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-1.5 w-full">
+                        <span className="font-bold text-xs flex items-center gap-1 text-blue-200">
+                          {getStageIcon(s.key, "h-3 w-3 text-blue-300")}
+                          <span>Stage {s.stepNumber}: {s.title}</span>
+                        </span>
+                        <span className="w-1 h-1 rounded-full bg-slate-500" />
+                        {done ? (
+                          <span className="text-[9px] font-bold text-emerald-300 bg-emerald-950/80 px-1.5 py-0.2 rounded flex items-center gap-0.5">
+                            <Check className="h-2 w-2 stroke-[3]" /> Completed
+                          </span>
+                        ) : active ? (
+                          <span className="text-[9px] font-bold text-blue-300 bg-blue-950/80 px-1.5 py-0.2 rounded flex items-center gap-0.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" /> Active
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-bold text-slate-400 bg-slate-800 px-1.5 py-0.2 rounded">
+                            Upcoming
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[9.5px] text-slate-300 font-normal leading-tight">
+                        {meta?.description}
+                      </p>
+                      {done && (
+                        <span className="text-[8.5px] text-emerald-400 font-medium">
+                          👉 Click to jump back to this stage
+                        </span>
+                      )}
+                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-r border-b border-slate-700/60" />
+                    </div>
+
+                    {/* Stage Icon Node */}
+                    <div
+                      className={cn(
+                        "relative w-12 h-12 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center transition-all duration-300 z-10",
+                        done
+                          ? "bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25 border-2 border-emerald-400 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-500/35"
+                          : active
+                          ? "bg-white border-2 border-[#004499] text-[#004499] ring-4 ring-blue-500/20 shadow-lg shadow-blue-500/25 scale-110"
+                          : "bg-white border-2 border-slate-200 text-slate-400 group-hover:border-blue-400 group-hover:text-[#004499] group-hover:bg-blue-50/40 group-hover:scale-105 shadow-2xs"
+                      )}
+                    >
+                      {/* Main Stage Icon */}
+                      {getStageIcon(
+                        s.key,
+                        cn(
+                          "transition-transform duration-300",
+                          active
+                            ? "h-5 w-5 sm:h-6 sm:w-6 text-[#004499] scale-105"
+                            : done
+                            ? "h-5 w-5 sm:h-6 sm:w-6 text-white"
+                            : "h-5 w-5 text-slate-400 group-hover:text-[#004499]"
+                        )
+                      )}
+
+                      {/* Active State Floating Stage Pill */}
+                      {active && (
+                        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#004499] text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded-full shadow-xs border border-white tracking-wider whitespace-nowrap animate-pulse">
+                          STAGE {s.stepNumber}
+                        </span>
+                      )}
+
+                      {/* Completed State Checkmark Badge */}
+                      {done && (
+                        <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-600 text-white border-2 border-white flex items-center justify-center shadow-xs">
+                          <Check className="h-2.5 w-2.5 stroke-[3]" />
+                        </span>
+                      )}
+
+                      {/* Upcoming State Number Badge */}
+                      {!done && !active && (
+                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-slate-100 text-slate-500 border border-slate-200 text-[9px] font-bold font-mono flex items-center justify-center group-hover:bg-blue-50 group-hover:text-[#004499] group-hover:border-blue-200 transition-colors">
+                          {s.stepNumber}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Stage Title & Number Labels */}
+                    <div className="mt-2.5 flex flex-col items-center space-y-0.5">
+                      <span
+                        className={cn(
+                          "text-[10px] sm:text-[11.5px] font-bold text-center leading-tight transition-colors duration-200 max-w-[70px] sm:max-w-[90px]",
+                          active
+                            ? "text-[#004499] font-black"
+                            : done
+                            ? "text-slate-700 group-hover:text-emerald-700 font-bold"
+                            : "text-slate-500 group-hover:text-slate-700"
+                        )}
+                      >
+                        {s.title}
+                      </span>
+                      <span
+                        className={cn(
+                          "text-[9px] font-mono flex items-center gap-1",
+                          active
+                            ? "text-[#004499] font-bold"
+                            : done
+                            ? "text-emerald-600 font-semibold"
+                            : "text-slate-400"
+                        )}
+                      >
+                        {done ? (
+                          <>
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                            Done
+                          </>
+                        ) : active ? (
+                          <>
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping inline-block" />
+                            Active
+                          </>
+                        ) : (
+                          `Step ${s.stepNumber}`
+                        )}
+                      </span>
                     </div>
                   </div>
-                  <span
-                    className={cn(
-                      "mt-3 text-[9px] font-bold uppercase tracking-tighter transition-colors duration-300 max-w-[70px] text-center leading-tight",
-                      active ? "text-[#004499]" : done ? "text-emerald-600" : "text-slate-400"
-                    )}
-                  >
-                    {s.title}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -469,7 +725,7 @@ export default function ElLeadJourneyPage() {
               />
             )}
 
-            {/* Bureau-Based Offer (Renamed from Initial Offer) */}
+            {/* Bureau-Based Final Offer */}
             {currentStage === "bureau_offer" && (
               <Stage6InitialOffer
                 customerData={customerData}
@@ -479,7 +735,7 @@ export default function ElLeadJourneyPage() {
                 onContinueForBanking={handleBureauOfferContinueForBanking}
                 onContinue={handleBureauOfferContinue}
                 onEditDetails={handleEditDetails}
-                onBackToSimulation={() => goTo("simulation")}
+                onBackToSimulation={() => (employmentRequired ? goTo("employment_verify") : goTo("simulation"))}
               />
             )}
 
@@ -490,11 +746,11 @@ export default function ElLeadJourneyPage() {
                 customerName={customerData.fullName}
                 stageNumber={currentStepNumber}
                 onComplete={handleBankingVerifyComplete}
-                onBack={() => goTo("simulation")}
+                onBack={() => (employmentRequired ? goTo("employment_verify") : goTo("simulation"))}
               />
             )}
 
-            {/* Banking Offer Screen */}
+            {/* Banking Final Offer Screen */}
             {currentStage === "banking_offer" && (
               <Stage8FinalOffer
                 customerData={customerData}
@@ -502,7 +758,7 @@ export default function ElLeadJourneyPage() {
                 stageNumber={currentStepNumber}
                 employmentRequired={employmentRequired}
                 onContinue={handleBankingOfferContinue}
-                onBackToSimulation={() => goTo("simulation")}
+                onBackToSimulation={() => goTo("banking_verify")}
                 isSimulatingLoader={isSimulatingLoader}
                 setIsSimulatingLoader={setIsSimulatingLoader}
               />
