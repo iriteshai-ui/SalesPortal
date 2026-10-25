@@ -231,7 +231,7 @@ export default function Stage5EmploymentVerification({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold uppercase tracking-wider text-[#004499]">
-                Stage 4 • Navigation Decision
+                Stage {stageNumber} • Navigation Decision
               </span>
             </div>
             <h3 className="text-xl font-bold text-slate-900 mt-0.5">
@@ -340,7 +340,7 @@ export default function Stage5EmploymentVerification({
                 </div>
                 <div>
                   <h4 className="text-base font-bold text-slate-900 group-hover:text-slate-800 transition-colors">
-                    No — Skip Stage 4
+                    No — Skip Stage {stageNumber}
                   </h4>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                     Bypass employment verification entirely and proceed directly to the next stage.

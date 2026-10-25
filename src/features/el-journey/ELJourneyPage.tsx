@@ -163,6 +163,65 @@ export const STAGE_CONFIG: Record<StageKey, StageMetadata> = {
   },
 };
 
+export const ALL_JOURNEY_STAGES = [
+  {
+    key: "details" as StageKey,
+    stepNumber: 1,
+    title: "Customer Details",
+    shortTitle: "Details",
+    description: "Applicant KYC, mobile & personal information",
+    icon: User,
+  },
+  {
+    key: "consent" as StageKey,
+    stepNumber: 2,
+    title: "Digital Consent",
+    shortTitle: "Consent",
+    description: "Customer OTP consent for CIBIL & CKYC fetch",
+    icon: ShieldCheck,
+  },
+  {
+    key: "employment_verify" as StageKey,
+    stepNumber: 3,
+    title: "Employment Verify",
+    shortTitle: "Employment",
+    description: "Employer verification & salary validation",
+    icon: Briefcase,
+  },
+  {
+    key: "banking_verify" as StageKey,
+    stepNumber: 4,
+    title: "Banking Verify",
+    shortTitle: "Banking",
+    description: "Net banking statement fetch & salary records",
+    icon: Building2,
+  },
+  {
+    key: "bureau_offer" as StageKey,
+    stepNumber: 5,
+    title: "Final Offer",
+    shortTitle: "Final Offer",
+    description: "Sanctioned loan offer, interest rate & EMI schedule",
+    icon: Award,
+  },
+  {
+    key: "timeline" as StageKey,
+    stepNumber: 6,
+    title: "Timeline",
+    shortTitle: "Timeline",
+    description: "Send DIY Journey link & track onboarding stages",
+    icon: Send,
+  },
+  {
+    key: "disbursement" as StageKey,
+    stepNumber: 7,
+    title: "Disbursement",
+    shortTitle: "Disbursement",
+    description: "Loan agreement sign-off and fund disbursement",
+    icon: Banknote,
+  },
+];
+
 const getStageIcon = (key: StageKey, className: string = "h-4 w-4") => {
   const IconComp = STAGE_CONFIG[key]?.icon || Sparkles;
   return <IconComp className={className} />;
@@ -194,35 +253,8 @@ export default function ElLeadJourneyPage() {
     return true;
   });
 
-  // ── Dynamic Stepper Calculation ──
-  // Skips unselected stages so they are NOT rendered in the progress indicator
-  const activeStages = useMemo<StageDef[]>(() => {
-    const list: { key: StageKey; title: string }[] = [
-      { key: "details", title: "Customer Details" },
-      { key: "consent", title: "Digital Consent" },
-    ];
-
-    if (employmentRequired) {
-      list.push({ key: "employment_verify", title: "Employment Verify" });
-    }
-
-    if (offerFlow === "bureau") {
-      // Case 1: Bureau-Based Offer (Skips Bank Verification & Banking Offer)
-      list.push({ key: "bureau_offer", title: "Final Offer" });
-    } else {
-      // Case 2: Banking Offer (Skips Bureau-Based Offer screen)
-      list.push({ key: "banking_verify", title: "Banking Verify" });
-      list.push({ key: "banking_offer", title: "Final Offer" });
-    }
-
-    list.push({ key: "timeline", title: "Timeline" });
-    list.push({ key: "disbursement", title: "Disbursement" });
-
-    return list.map((item, index) => ({
-      ...item,
-      stepNumber: index + 1,
-    }));
-  }, [offerFlow, employmentRequired]);
+  // ── Fixed 7-Stage Journey Definition (Always all 7 stages visible) ──
+  // Sequence matches official standard: Details -> Consent -> Employment -> Banking -> Final Offer -> Timeline -> Disbursement
 
   // Current Active Stage
   const [currentStage, setCurrentStage] = useState<StageKey>(() => {
@@ -280,15 +312,83 @@ export default function ElLeadJourneyPage() {
   // Loader state
   const [isSimulatingLoader, setIsSimulatingLoader] = useState<boolean>(false);
 
-  // Stepper calculations
-  const activeIdx = activeStages.findIndex((s) => s.key === currentStage);
-  const currentStepNumber = activeIdx >= 0 ? activeStages[activeIdx].stepNumber : 1;
-  const progressPct =
-    currentStage === "simulation"
-      ? Math.round((2 / activeStages.length) * 100)
-      : activeIdx >= 0
-      ? Math.round(((activeIdx + 1) / activeStages.length) * 100)
-      : 0;
+  // ── Track Genuinely Completed Stages (Never marks skipped stages as completed) ──
+  const [completedStages, setCompletedStages] = useState<Set<string>>(() => {
+    const initialSet = new Set<string>();
+    if (initialStageParam) {
+      if (initialStageParam === "2") {
+        initialSet.add("details");
+      } else if (initialStageParam === "3" || initialStageParam === "simulation") {
+        initialSet.add("details");
+        initialSet.add("consent");
+      } else if (initialStageParam === "4") {
+        initialSet.add("details");
+        initialSet.add("consent");
+        if (initialEmpParam !== "no" && initialEmpParam !== "false") {
+          initialSet.add("employment_verify");
+        }
+      } else if (initialStageParam === "5" || initialStageParam === "6" || initialStageParam === "banking_verify" || initialStageParam === "banking_offer") {
+        initialSet.add("details");
+        initialSet.add("consent");
+        if (initialEmpParam !== "no" && initialEmpParam !== "false") {
+          initialSet.add("employment_verify");
+        }
+        if (initialFlowParam === "banking" && initialStageParam !== "banking_verify") {
+          initialSet.add("banking_verify");
+        }
+      } else if (initialStageParam === "7" || initialStageParam === "timeline") {
+        initialSet.add("details");
+        initialSet.add("consent");
+        if (initialEmpParam !== "no" && initialEmpParam !== "false") {
+          initialSet.add("employment_verify");
+        }
+        if (initialFlowParam === "banking") {
+          initialSet.add("banking_verify");
+        }
+        initialSet.add("final_offer");
+        initialSet.add("timeline");
+      }
+    }
+    return initialSet;
+  });
+
+  // Stepper calculations across the fixed 7 stages
+  const getActiveStepIndex = (stage: StageKey): number => {
+    if (stage === "details") return 0;
+    if (stage === "consent") return 1;
+    if (stage === "simulation") return 1;
+    if (stage === "employment_verify") return 2;
+    if (stage === "banking_verify") return 3;
+    if (stage === "bureau_offer" || stage === "banking_offer") return 4;
+    if (stage === "timeline") return 5;
+    if (stage === "disbursement") return 6;
+    return 0;
+  };
+
+  const activeStepIdx = getActiveStepIndex(currentStage);
+  const isSimulation = currentStage === "simulation";
+  const currentStepNumber = isSimulation ? 2 : activeStepIdx + 1;
+  const progressPct = isSimulation
+    ? Math.round((2 / 7) * 100)
+    : Math.round((currentStepNumber / 7) * 100);
+
+  const isStageCompleted = (key: StageKey, idx: number): boolean => {
+    if (isSimulation) return idx < 2;
+    if (activeStepIdx === idx) return false;
+    if (key === "bureau_offer" || key === "banking_offer") {
+      return (
+        completedStages.has("final_offer") ||
+        completedStages.has("bureau_offer") ||
+        completedStages.has("banking_offer")
+      );
+    }
+    return completedStages.has(key);
+  };
+
+  const isStageActive = (key: StageKey, idx: number): boolean => {
+    if (isSimulation) return false;
+    return activeStepIdx === idx;
+  };
 
   // Stage navigation
   const goTo = (stage: StageKey) => {
@@ -306,11 +406,13 @@ export default function ElLeadJourneyPage() {
   // ── Stage Handlers ──
   const handleStage1Complete = (data: DemoProfile) => {
     setCustomerData(data);
+    setCompletedStages((prev) => new Set(prev).add("details"));
     goTo("consent");
   };
 
   // When Consent is approved -> Proceed immediately to Simulation Screen!
   const handleStage2Complete = () => {
+    setCompletedStages((prev) => new Set(prev).add("details").add("consent"));
     goTo("simulation");
   };
 
@@ -336,6 +438,9 @@ export default function ElLeadJourneyPage() {
         loanTenure: offerData.tenure,
       }));
     }
+    setCompletedStages((prev) =>
+      new Set(prev).add("final_offer").add("bureau_offer").add("banking_offer")
+    );
     goTo("timeline");
   };
 
@@ -353,6 +458,9 @@ export default function ElLeadJourneyPage() {
   };
 
   const handleBureauOfferContinue = () => {
+    setCompletedStages((prev) =>
+      new Set(prev).add("final_offer").add("bureau_offer").add("banking_offer")
+    );
     goTo("timeline");
   };
 
@@ -362,16 +470,21 @@ export default function ElLeadJourneyPage() {
 
   // Bank Verification Complete -> Display Final Offer
   const handleBankingVerifyComplete = () => {
+    setCompletedStages((prev) => new Set(prev).add("banking_verify"));
     goTo("banking_offer");
   };
 
   // Final Offer (Banking Track): Accept Banking Offer -> proceeds directly to Timeline
   const handleBankingOfferContinue = () => {
+    setCompletedStages((prev) =>
+      new Set(prev).add("final_offer").add("bureau_offer").add("banking_offer")
+    );
     goTo("timeline");
   };
 
   // Employment Verification (Stage 3): Skip or Complete -> proceed to Offer track
   const handleEmploymentSkip = () => {
+    // Skipped! Do NOT add employment_verify to completedStages
     if (offerFlow === "bureau") {
       goTo("bureau_offer");
     } else {
@@ -380,6 +493,7 @@ export default function ElLeadJourneyPage() {
   };
 
   const handleEmploymentComplete = () => {
+    setCompletedStages((prev) => new Set(prev).add("employment_verify"));
     if (offerFlow === "bureau") {
       goTo("bureau_offer");
     } else {
@@ -392,6 +506,7 @@ export default function ElLeadJourneyPage() {
   };
 
   const handleTimelineComplete = () => {
+    setCompletedStages((prev) => new Set(prev).add("timeline"));
     goTo("disbursement");
   };
 
@@ -403,12 +518,24 @@ export default function ElLeadJourneyPage() {
   const handleResumeLead = (leadAppId: string) => {
     const found = MOCK_EXISTING_EL_LEADS.find((l) => l.appId === leadAppId);
     if (found) {
-      if (found.stageId === 2) goTo("consent");
-      else if (found.stageId === 3) goTo("employment_verify");
-      else if (found.stageId === 4) goTo(offerFlow === "banking" ? "banking_verify" : "bureau_offer");
-      else if (found.stageId === 7) goTo("timeline");
-      else goTo("employment_verify");
+      if (found.stageId === 2) {
+        setCompletedStages(new Set(["details"]));
+        goTo("consent");
+      } else if (found.stageId === 3) {
+        setCompletedStages(new Set(["details", "consent"]));
+        goTo("employment_verify");
+      } else if (found.stageId === 4) {
+        setCompletedStages(new Set(["details", "consent", "employment_verify"]));
+        goTo(offerFlow === "banking" ? "banking_verify" : "bureau_offer");
+      } else if (found.stageId === 7) {
+        setCompletedStages(new Set(["details", "consent", "employment_verify", "banking_verify", "final_offer", "bureau_offer", "banking_offer", "timeline"]));
+        goTo("timeline");
+      } else {
+        setCompletedStages(new Set(["details", "consent"]));
+        goTo("employment_verify");
+      }
     } else {
+      setCompletedStages(new Set(["details", "consent"]));
       goTo("employment_verify");
     }
   };
@@ -502,25 +629,31 @@ export default function ElLeadJourneyPage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#004499] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#004499]"></span>
               </span>
-              <span className="font-bold text-slate-800">
-                Stage {currentStepNumber} of {activeStages.length}:
+              <span className="font-bold text-slate-800 text-xs sm:text-sm">
+                Stage {currentStepNumber} of 7:
               </span>
-              <span className="inline-flex items-center gap-1.5 font-bold text-[#004499] bg-blue-50 px-2.5 py-0.5 rounded-lg border border-blue-200/70 shadow-2xs">
-                {getStageIcon(currentStage, "h-3.5 w-3.5 text-[#004499]")}
-                <span>{STAGE_CONFIG[currentStage]?.title || "Current Stage"}</span>
+              <span className="inline-flex items-center gap-1.5 font-bold text-[#004499] bg-blue-50 px-3 py-1 rounded-xl border border-blue-200/80 shadow-2xs">
+                {getStageIcon(currentStage === "simulation" ? "consent" : currentStage, "h-3.5 w-3.5 text-[#004499]")}
+                <span>
+                  {currentStage === "simulation"
+                    ? "Digital Consent"
+                    : STAGE_CONFIG[currentStage]?.title || "Current Stage"}
+                </span>
               </span>
-              <span className="hidden sm:inline text-slate-300">•</span>
-              <span className="hidden md:inline text-slate-500 font-medium text-[11px]">
-                {STAGE_CONFIG[currentStage]?.description}
+              <span className="hidden sm:inline text-slate-300 font-bold">•</span>
+              <span className="hidden md:inline text-slate-500 font-medium text-[11px] sm:text-xs">
+                {currentStage === "simulation"
+                  ? STAGE_CONFIG["consent"]?.description
+                  : STAGE_CONFIG[currentStage]?.description}
               </span>
             </div>
 
-            <div className="flex items-center gap-2.5 ml-auto text-[11px]">
-              <span className="text-slate-400 hidden lg:inline">
+            <div className="flex items-center gap-2.5 ml-auto text-[11px] sm:text-xs">
+              <span className="text-slate-400 hidden lg:inline flex items-center gap-1">
                 💡 Click completed stage to review
               </span>
-              <div className="flex items-center gap-1.5 bg-slate-100/90 text-slate-700 px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold border border-slate-200">
-                <Sparkles className="h-3 w-3 text-amber-500" />
+              <div className="flex items-center gap-1.5 bg-slate-100/90 text-slate-700 px-3 py-1 rounded-full font-mono text-[11px] sm:text-xs font-bold border border-slate-200/80 shadow-2xs">
+                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
                 <span>{progressPct}% Completed</span>
               </div>
             </div>
@@ -528,26 +661,55 @@ export default function ElLeadJourneyPage() {
 
           <div className="relative pt-10 pb-2 px-2 sm:px-6">
             {/* Background connecting track perfectly centered through icon nodes */}
-            <div className="absolute top-[64px] sm:top-[66px] left-8 sm:left-12 right-8 sm:right-12 h-2 bg-slate-100 rounded-full border border-slate-200/60 -translate-y-1/2" />
-            
-            {/* Animated gradient progress fill line */}
-            <div
-              className="absolute top-[64px] sm:top-[66px] left-8 sm:left-12 h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-[#004499] -translate-y-1/2 transition-all duration-700 ease-in-out rounded-full shadow-[0_0_12px_rgba(16,185,129,0.35)]"
-              style={{ width: `${Math.min(progressPct, 95)}%` }}
-            />
+            <div className="absolute top-[64px] sm:top-[68px] left-[32px] sm:left-[52px] right-[32px] sm:right-[52px] h-2 -translate-y-1/2 pointer-events-none">
+              {/* Base grey line */}
+              <div className="absolute inset-0 bg-slate-100 rounded-full border border-slate-200/70" />
+
+              {/* 6 Interval Segments */}
+              <div className="absolute inset-0 flex overflow-hidden rounded-full">
+                {[0, 1, 2, 3, 4, 5].map((segIdx) => {
+                  const leftStage = ALL_JOURNEY_STAGES[segIdx];
+                  const rightStage = ALL_JOURNEY_STAGES[segIdx + 1];
+
+                  const leftDone = isStageCompleted(leftStage.key, segIdx);
+                  const rightDone = isStageCompleted(rightStage.key, segIdx + 1);
+                  const rightActive = isStageActive(rightStage.key, segIdx + 1);
+                  const leftActive = isStageActive(leftStage.key, segIdx);
+
+                  const isGreen = leftDone && (rightDone || rightActive);
+                  const isBlueProtrusion = leftActive;
+
+                  return (
+                    <div key={segIdx} className="relative flex-1 h-full">
+                      {isGreen && (
+                        <div className="w-full h-full bg-emerald-500 transition-all duration-500" />
+                      )}
+                      {!isGreen && isBlueProtrusion && (
+                        <div className="w-1/2 h-full bg-[#004499] rounded-r-full shadow-xs transition-all duration-500" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
             <div className="relative flex justify-between items-start">
-              {activeStages.map((s, idx) => {
-                const isSimulation = currentStage === "simulation";
-                const done = isSimulation ? idx < 2 : activeIdx > idx;
-                const active = isSimulation ? false : activeIdx === idx;
+              {ALL_JOURNEY_STAGES.map((s, idx) => {
+                const done = isStageCompleted(s.key, idx);
+                const active = isStageActive(s.key, idx);
                 const meta = STAGE_CONFIG[s.key];
 
                 return (
                   <div
                     key={s.key}
                     onClick={() => {
-                      if (done) goTo(s.key);
+                      if (done) {
+                        if (s.key === "bureau_offer") {
+                          goTo(offerFlow === "banking" ? "banking_offer" : "bureau_offer");
+                        } else {
+                          goTo(s.key);
+                        }
+                      }
                     }}
                     className={cn(
                       "flex flex-col items-center group relative select-none transition-all duration-300",
@@ -572,7 +734,7 @@ export default function ElLeadJourneyPage() {
                           </span>
                         ) : (
                           <span className="text-[9px] font-bold text-slate-400 bg-slate-800 px-1.5 py-0.2 rounded">
-                            Upcoming
+                            {idx < activeStepIdx ? "Skipped / Inactive" : "Upcoming"}
                           </span>
                         )}
                       </div>
@@ -590,12 +752,12 @@ export default function ElLeadJourneyPage() {
                     {/* Stage Icon Node */}
                     <div
                       className={cn(
-                        "relative w-12 h-12 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center transition-all duration-300 z-10",
+                        "relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center transition-all duration-300 z-10",
                         done
-                          ? "bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25 border-2 border-emerald-400 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-500/35"
+                          ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/25 border-2 border-emerald-400 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-emerald-500/35"
                           : active
-                          ? "bg-white border-2 border-[#004499] text-[#004499] ring-4 ring-blue-500/20 shadow-lg shadow-blue-500/25 scale-110"
-                          : "bg-white border-2 border-slate-200 text-slate-400 group-hover:border-blue-400 group-hover:text-[#004499] group-hover:bg-blue-50/40 group-hover:scale-105 shadow-2xs"
+                          ? "bg-white border-2 border-[#004499] text-[#004499] ring-4 ring-blue-500/20 shadow-lg shadow-blue-500/25 scale-105"
+                          : "bg-white border-2 border-slate-200 text-slate-400 shadow-2xs"
                       )}
                     >
                       {/* Main Stage Icon */}
@@ -604,30 +766,30 @@ export default function ElLeadJourneyPage() {
                         cn(
                           "transition-transform duration-300",
                           active
-                            ? "h-5 w-5 sm:h-6 sm:w-6 text-[#004499] scale-105"
+                            ? "h-5 w-5 sm:h-6 sm:w-6 text-[#004499]"
                             : done
                             ? "h-5 w-5 sm:h-6 sm:w-6 text-white"
-                            : "h-5 w-5 text-slate-400 group-hover:text-[#004499]"
+                            : "h-5 w-5 sm:h-6 sm:w-6 text-slate-400"
                         )
                       )}
 
                       {/* Active State Floating Stage Pill */}
                       {active && (
-                        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#004499] text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded-full shadow-xs border border-white tracking-wider whitespace-nowrap animate-pulse">
+                        <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#004499] text-white text-[9.5px] font-bold px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap tracking-wider font-mono">
                           STAGE {s.stepNumber}
                         </span>
                       )}
 
                       {/* Completed State Checkmark Badge */}
                       {done && (
-                        <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-600 text-white border-2 border-white flex items-center justify-center shadow-xs">
+                        <span className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-emerald-600 text-white border-2 border-white flex items-center justify-center shadow-xs">
                           <Check className="h-2.5 w-2.5 stroke-[3]" />
                         </span>
                       )}
 
-                      {/* Upcoming State Number Badge */}
+                      {/* Inactive / Upcoming / Skipped State Number Badge */}
                       {!done && !active && (
-                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-slate-100 text-slate-500 border border-slate-200 text-[9px] font-bold font-mono flex items-center justify-center group-hover:bg-blue-50 group-hover:text-[#004499] group-hover:border-blue-200 transition-colors">
+                        <span className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 rounded-full bg-slate-100 text-slate-400 border border-slate-200 text-[9px] font-bold font-mono flex items-center justify-center">
                           {s.stepNumber}
                         </span>
                       )}
@@ -637,24 +799,24 @@ export default function ElLeadJourneyPage() {
                     <div className="mt-2.5 flex flex-col items-center space-y-0.5">
                       <span
                         className={cn(
-                          "text-[10px] sm:text-[11.5px] font-bold text-center leading-tight transition-colors duration-200 max-w-[70px] sm:max-w-[90px]",
+                          "text-[10.5px] sm:text-[12px] font-bold text-center leading-tight transition-colors duration-200 max-w-[75px] sm:max-w-[95px]",
                           active
                             ? "text-[#004499] font-black"
                             : done
-                            ? "text-slate-700 group-hover:text-emerald-700 font-bold"
-                            : "text-slate-500 group-hover:text-slate-700"
+                            ? "text-slate-800 font-bold"
+                            : "text-slate-500 font-semibold"
                         )}
                       >
                         {s.title}
                       </span>
                       <span
                         className={cn(
-                          "text-[9px] font-mono flex items-center gap-1",
+                          "text-[9.5px] sm:text-[10px] font-mono flex items-center gap-1",
                           active
                             ? "text-[#004499] font-bold"
                             : done
-                            ? "text-emerald-600 font-semibold"
-                            : "text-slate-400"
+                            ? "text-emerald-600 font-bold"
+                            : "text-slate-400 font-medium"
                         )}
                       >
                         {done ? (
@@ -664,7 +826,7 @@ export default function ElLeadJourneyPage() {
                           </>
                         ) : active ? (
                           <>
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping inline-block" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#004499] inline-block" />
                             Active
                           </>
                         ) : (

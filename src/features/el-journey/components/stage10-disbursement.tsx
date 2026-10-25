@@ -96,7 +96,7 @@ export default function Stage10Disbursement({
 
   const finalSanctionAmount = customerData.loanAmount || 2500000;
   const processingFee = Math.round((finalSanctionAmount * 0.005) * 1.18);
-  const netAmount = finalSanctionAmount - processingFee;
+  const netAmount = finalSanctionAmount;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-400">
@@ -175,9 +175,9 @@ export default function Stage10Disbursement({
                 </span>
               </div>
               <div className="flex justify-between items-center py-1 border-b border-white/15">
-                <span className="text-emerald-100">Beneficiary Institution</span>
+                <span className="text-emerald-100">Beneficiary Account</span>
                 <span className="font-bold text-white truncate max-w-[200px]">
-                  {customerData.institutionName}
+                  {customerData.fullName}
                 </span>
               </div>
               <div className="flex justify-between items-center py-1 border-b border-white/15">

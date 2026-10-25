@@ -371,7 +371,7 @@ async function runAutomation() {
 
     // Toggle a milestone tile manually
     console.log("   -> Toggling individual milestone step...");
-    const firstStepTile = page.locator('div:has-text("Final Offer Summary")').last();
+    const firstStepTile = page.locator('div:has-text("KYC")').last();
     if (await firstStepTile.isVisible()) {
       await firstStepTile.click();
       await pause(1200);

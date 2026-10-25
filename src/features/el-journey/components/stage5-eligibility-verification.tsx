@@ -196,7 +196,7 @@ export default function Stage5EligibilityVerification({
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                {customerData.courseName} • {customerData.institutionName}
+                {customerData.courseName} • {customerData.employerName ? `${customerData.employerName} • ` : ""}{customerData.highestEducation || "Graduate"}
               </p>
             </div>
           </div>

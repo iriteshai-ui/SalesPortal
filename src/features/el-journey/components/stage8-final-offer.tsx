@@ -77,14 +77,13 @@ export default function Stage8FinalOffer({
     (Math.pow(1 + monthlyRate, tenureMonths) - 1)
   ); // ₹31,326
 
-  // Consistent Fee Breakdown (Matching Initial Offer Screen structure)
-  const processingFee = Math.round(loanAmount * 0.01); // 1.0% = ₹15,000
-  const gst = Math.round(processingFee * 0.18); // 18% of PF = ₹2,700
+  // Transparent Fee Breakdown
+  const processingFeeIncGst = Math.round(loanAmount * 0.01 * 1.18); // 1.0% + 18% GST = ₹17,700
   const stampDuty = 50; // Hardcoded at ₹50 as required
-  const docCharges = 0; // Waived
-  const totalDeductions = processingFee + gst + stampDuty + docCharges; // ₹17,750
-  const netDisbursement = loanAmount - totalDeductions; // ₹14,82,250
-  const totalAmount = loanAmount + gst + stampDuty + processingFee; // ₹15,17,750
+  const totalCharges = processingFeeIncGst + stampDuty; // ₹17,750
+  // Net Disbursement Amount must always equal Applied Loan Amount without deductions
+  const netDisbursement = loanAmount; // ₹15,00,000
+  const totalAmount = loanAmount + totalCharges; // ₹15,17,750
 
   // Auto-start loader on mount if requested
   useEffect(() => {
@@ -203,7 +202,7 @@ export default function Stage8FinalOffer({
                 {customerData.courseName || "MS in Data Science & Artificial Intelligence"}
               </p>
               <p className="text-xs text-slate-500">
-                {customerData.institutionName || "Indian Institute of Science (IISc) / BITS Pilani"}
+                {customerData.employerName ? `${customerData.employerName} • ` : ""}{customerData.highestEducation || "Graduate / Bachelor's Degree"}
               </p>
             </div>
           </div>
@@ -293,7 +292,7 @@ export default function Stage8FinalOffer({
             </div>
             <div className="pt-2 border-t border-blue-200/80">
               <p className="text-[10px] text-blue-700 font-mono leading-relaxed">
-                Total Amount = {formatCurrency(loanAmount)} (Loan) + {formatCurrency(gst)} (GST on PF) + {formatCurrency(stampDuty)} (Stamp Duty) + {formatCurrency(processingFee)} (PF)
+                Total Amount = {formatCurrency(loanAmount)} (Loan) + {formatCurrency(processingFeeIncGst)} (PF inc. GST) + {formatCurrency(stampDuty)} (Stamp Duty)
               </p>
             </div>
           </div>
@@ -326,7 +325,7 @@ export default function Stage8FinalOffer({
             </div>
           </div>
 
-          {/* Transparent Charges Breakdown 2x2 Grid */}
+          {/* Transparent Charges Breakdown 2-Column Grid */}
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-2.5">
             <div className="flex items-center justify-between text-xs font-bold text-slate-600">
               <span className="flex items-center gap-1.5 uppercase tracking-wider text-[10px] text-slate-400">
@@ -337,30 +336,19 @@ export default function Stage8FinalOffer({
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
-              {/* Processing Fee */}
-              <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
+              {/* Processing Fees (inc. GST) */}
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                  Processing Fee (1.0%)
+                  Processing Fees (inc. GST)
                 </p>
                 <p className="text-sm font-bold text-slate-900 font-mono">
-                  {formatCurrency(processingFee)}
+                  {formatCurrency(processingFeeIncGst)}
                 </p>
-                <p className="text-[9px] text-slate-400">1.0% of {formatCurrency(loanAmount)}</p>
-              </div>
-
-              {/* GST */}
-              <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                  GST (18% on PF)
-                </p>
-                <p className="text-sm font-bold text-slate-900 font-mono">
-                  {formatCurrency(gst)}
-                </p>
-                <p className="text-[9px] text-slate-400">Statutory GST on processing fee</p>
+                <p className="text-[9px] text-slate-400">1.0% + 18% GST included</p>
               </div>
 
               {/* Stamp Duty */}
-              <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
                 <div className="flex items-center justify-between">
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
                     Stamp Duty
@@ -374,29 +362,13 @@ export default function Stage8FinalOffer({
                 </p>
                 <p className="text-[9px] text-slate-400">Statutory e-Stamp charges</p>
               </div>
-
-              {/* Documentation / Verification Charges */}
-              <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
-                <div className="flex items-center justify-between">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                    Doc / Legal Fee
-                  </p>
-                  <Badge className="bg-emerald-100 text-emerald-800 text-[8px] px-1 py-0">
-                    Waived
-                  </Badge>
-                </div>
-                <p className="text-sm font-bold text-emerald-700 font-mono">
-                  ₹0
-                </p>
-                <p className="text-[9px] text-slate-400">Zero additional paperwork fees</p>
-              </div>
             </div>
 
-            {/* Total Deductions Summary Line */}
-            <div className="flex items-center justify-between px-3 py-1.5 bg-slate-100/80 rounded-xl text-xs text-slate-600 border border-slate-200">
-              <span className="font-semibold text-[11px]">Total Applicable Deductions</span>
+            {/* Total Charges Summary Line */}
+            <div className="flex items-center justify-between px-3 py-2 bg-slate-100/80 rounded-xl text-xs text-slate-600 border border-slate-200">
+              <span className="font-semibold text-[11px]">Total Applicable Charges</span>
               <span className="font-mono font-bold text-slate-900">
-                {formatCurrency(totalDeductions)}
+                {formatCurrency(totalCharges)}
               </span>
             </div>
           </div>
@@ -409,7 +381,7 @@ export default function Stage8FinalOffer({
                   <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Net Disbursal Amount
                 </span>
                 <p className="text-xs text-emerald-700 font-medium">
-                  Direct transfer to institution / student bank account
+                  Direct transfer to customer / beneficiary bank account
                 </p>
               </div>
               <div className="text-2xl sm:text-3xl font-black text-emerald-900 font-mono shrink-0">
@@ -417,8 +389,8 @@ export default function Stage8FinalOffer({
               </div>
             </div>
             <div className="pt-2 border-t border-emerald-200/80">
-              <p className="text-[10px] text-emerald-600 font-mono leading-relaxed">
-                Formula: {formatCurrency(loanAmount)} − {formatCurrency(totalDeductions)}
+              <p className="text-[10px] text-emerald-700 font-mono font-medium leading-relaxed">
+                Full Applied Loan Amount: {formatCurrency(loanAmount)} (No deductions from disbursal)
               </p>
             </div>
           </div>

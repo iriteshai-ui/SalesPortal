@@ -1,3 +1,23 @@
+export interface CoApplicantDetails {
+  fullName: string;
+  fatherName: string;
+  gender: "Male" | "Female" | "Other" | "";
+  relationWithApplicant: "Father" | "Mother" | "Spouse" | "Guardian" | "Other" | "";
+  maritalStatus: "Single" | "Married" | "Divorced" | "Widowed" | "";
+  pan: string;
+  dob: string; // YYYY-MM-DD
+  email: string;
+  highestEducation: string;
+  employerName: string;
+  salary: number;
+  sameAsMainApplicantAddress: boolean;
+  address: string;
+  landmark?: string;
+  pinCode: string;
+  city: string;
+  state: string;
+}
+
 export interface DemoProfile {
   id: string;
   label: string;
@@ -17,12 +37,81 @@ export interface DemoProfile {
   city: string;
   state: string;
   courseName: string;
-  institutionName: string;
-  admissionStatus: string;
+  institutionName?: string;
+  admissionStatus?: string;
+  salary?: number;
+  employerName?: string;
+  highestEducation?: string;
   loanAmount: number;
   loanTenure: number;
   employmentType: "Salaried" | "Self-employed";
+  isCoApplicantRequired?: boolean;
+  coApplicant?: CoApplicantDetails;
 }
+
+export const MOCK_EDUCATION_LEVELS = [
+  "High School (10th / 12th)",
+  "Diploma",
+  "Graduate / Bachelor's Degree",
+  "Post Graduate / Master's Degree",
+  "Doctorate / Ph.D.",
+  "Professional Degree (CA / CS / ICWA / MBBS)",
+];
+
+export const MOCK_RELATIONS = [
+  "Father",
+  "Mother",
+  "Spouse",
+  "Guardian",
+  "Other",
+];
+
+export const MOCK_MARITAL_STATUSES = [
+  "Single",
+  "Married",
+  "Divorced",
+  "Widowed",
+];
+
+export const MOCK_CO_APPLICANT_PROFILE: CoApplicantDetails = {
+  fullName: "Aarav Sharma",
+  fatherName: "Ramesh Sharma",
+  gender: "Male",
+  relationWithApplicant: "Father",
+  maritalStatus: "Married",
+  pan: "ABCPS1234F",
+  dob: "1978-06-15",
+  email: "aarav.sharma@example.com",
+  highestEducation: "Graduate / Bachelor's Degree",
+  employerName: "Tata Consultancy Services Ltd.",
+  salary: 85000,
+  sameAsMainApplicantAddress: false,
+  address: "Flat 402, Green Glen Apartments, Bellandur",
+  landmark: "Near Central Mall",
+  pinCode: "560103",
+  city: "Bengaluru",
+  state: "Karnataka",
+};
+
+export const EMPTY_CO_APPLICANT_PROFILE: CoApplicantDetails = {
+  fullName: "",
+  fatherName: "",
+  gender: "",
+  relationWithApplicant: "",
+  maritalStatus: "",
+  pan: "",
+  dob: "",
+  email: "",
+  highestEducation: "",
+  employerName: "",
+  salary: 0,
+  sameAsMainApplicantAddress: false,
+  address: "",
+  landmark: "",
+  pinCode: "",
+  city: "",
+  state: "",
+};
 
 export const MOCK_COURSES = [
   "B.Tech in Computer Science & Engineering",
@@ -55,6 +144,7 @@ export const PIN_LOCATION_MAP: Record<string, { city: string; state: string; ser
   "400001": { city: "Mumbai", state: "Maharashtra", serviceable: true },
   "110001": { city: "New Delhi", state: "Delhi", serviceable: true },
   "560001": { city: "Bengaluru", state: "Karnataka", serviceable: true },
+  "560103": { city: "Bengaluru", state: "Karnataka", serviceable: true },
   "600001": { city: "Chennai", state: "Tamil Nadu", serviceable: true },
   "500001": { city: "Hyderabad", state: "Telangana", serviceable: true },
   "700001": { city: "Kolkata", state: "West Bengal", serviceable: true },
@@ -86,6 +176,9 @@ export const DEMO_PROFILES: DemoProfile[] = [
     courseName: "MS in Data Science & Artificial Intelligence",
     institutionName: "Indian Institute of Science (IISc) / BITS Pilani",
     admissionStatus: "Confirmed Admission",
+    salary: 85000,
+    employerName: "Tata Consultancy Services Ltd",
+    highestEducation: "Graduate / Bachelor's Degree",
     loanAmount: 2500000,
     loanTenure: 84,
     employmentType: "Salaried",
@@ -111,6 +204,9 @@ export const DEMO_PROFILES: DemoProfile[] = [
     courseName: "MBA in International Business & Finance",
     institutionName: "Indian Institute of Management (IIM) Ahmedabad",
     admissionStatus: "Confirmed Admission",
+    salary: 95000,
+    employerName: "Infosys Limited",
+    highestEducation: "Post Graduate / Master's Degree",
     loanAmount: 2200000,
     loanTenure: 72,
     employmentType: "Salaried",
@@ -136,6 +232,9 @@ export const DEMO_PROFILES: DemoProfile[] = [
     courseName: "MBBS (Bachelor of Medicine & Surgery)",
     institutionName: "All India Institute of Medical Sciences (AIIMS) New Delhi",
     admissionStatus: "Conditional Offer",
+    salary: 60000,
+    employerName: "Apollo Hospitals Enterprise",
+    highestEducation: "Graduate / Bachelor's Degree",
     loanAmount: 3500000,
     loanTenure: 96,
     employmentType: "Salaried",
@@ -161,6 +260,9 @@ export const DEMO_PROFILES: DemoProfile[] = [
     courseName: "B.Tech in Computer Science & Engineering",
     institutionName: "Indian Institute of Technology (IIT) Bombay",
     admissionStatus: "Confirmed Admission",
+    salary: 70000,
+    employerName: "Wipro Technologies",
+    highestEducation: "Graduate / Bachelor's Degree",
     loanAmount: 1800000,
     loanTenure: 60,
     employmentType: "Salaried",
@@ -186,6 +288,9 @@ export const DEMO_PROFILES: DemoProfile[] = [
     courseName: "B.Sc in Biotechnology & Bioinformatics",
     institutionName: "Vellore Institute of Technology (VIT)",
     admissionStatus: "Applied / Awaiting Merit List",
+    salary: 35000,
+    employerName: "Reliance Retail Ltd",
+    highestEducation: "High School (10th / 12th)",
     loanAmount: 1200000,
     loanTenure: 48,
     employmentType: "Salaried",

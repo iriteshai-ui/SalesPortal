@@ -10,6 +10,8 @@ import {
   Fingerprint,
   PenLine,
   Zap,
+  ShieldCheck,
+  MailCheck,
 } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 import confetti from "canvas-confetti";
@@ -32,8 +34,14 @@ interface TimelineStep {
 
 const DEFAULT_STEPS: TimelineStep[] = [
   {
+    id: "kyc",
+    label: "KYC",
+    desc: "Digital KYC and identity verification completed by customer",
+    icon: <ShieldCheck className="h-5 w-5" />,
+  },
+  {
     id: "offer",
-    label: "Final Offer Summary",
+    label: "Final Offer",
     desc: "Customer reviews and accepts the final loan offer terms",
     icon: <IndianRupee className="h-5 w-5" />,
   },
@@ -54,6 +62,12 @@ const DEFAULT_STEPS: TimelineStep[] = [
     label: "eNACH",
     desc: "Electronic NACH mandate registered for EMI deduction",
     icon: <Fingerprint className="h-5 w-5" />,
+  },
+  {
+    id: "email_verify",
+    label: "Personal Email ID Verification",
+    desc: "Verification OTP and link authenticated via personal email ID",
+    icon: <MailCheck className="h-5 w-5" />,
   },
   {
     id: "esign",

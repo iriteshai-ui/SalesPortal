@@ -399,7 +399,7 @@ export default function StageSimulationScreen({
         {/* Skipped Stages Tag */}
         <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-500 flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-600">Skipped from Progress Indicator:</span>
+            <span className="font-semibold text-slate-600">Skipped in this Flow (Frozen on Tracker):</span>
             <div className="flex gap-1.5 flex-wrap">
               {offerFlow === "bureau" ? (
                 <>
@@ -423,7 +423,7 @@ export default function StageSimulationScreen({
             </div>
           </div>
           <span className="text-[10px] text-slate-400 italic">
-            *Skipped stages will not be rendered as active steps in the stepper.
+            *Skipped stages remain frozen in default inactive grey on the journey tracker.
           </span>
         </div>
       </div>

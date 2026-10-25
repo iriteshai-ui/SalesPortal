@@ -55,14 +55,13 @@ export default function Stage6InitialOffer({
     (Math.pow(1 + monthlyRate, tenureMonths) - 1)
   ); // ~₹23,188
 
-  // Fee Breakdown (Each fee exists strictly ONCE)
-  const processingFee = Math.round(loanAmount * 0.01); // 1.0% = ₹5,000
-  const gst = Math.round(processingFee * 0.18); // 18% on PF = ₹900
+  // Transparent Fee Breakdown
+  const processingFeeIncGst = Math.round(loanAmount * 0.01 * 1.18); // 1.0% + 18% GST = ₹5,900
   const stampDuty = 50; // Statutory ₹50
-  const docCharges = 0; // Waived
-  const totalDeductions = processingFee + gst + stampDuty + docCharges; // ₹5,950
-  const netDisbursement = loanAmount - totalDeductions; // ₹4,94,050
-  const totalAmount = loanAmount + gst + stampDuty + processingFee; // ₹5,05,950
+  const totalCharges = processingFeeIncGst + stampDuty; // ₹5,950
+  // Net Disbursement Amount must always equal Applied Loan Amount without deductions
+  const netDisbursement = loanAmount; // ₹5,00,000
+  const totalAmount = loanAmount + totalCharges; // ₹5,05,950
 
   const handleContinueWithOffer = () => {
     const offerData = {
@@ -72,10 +71,9 @@ export default function Stage6InitialOffer({
       netDisbursement,
       totalAmount,
       interestRate,
-      processingFee,
-      gst,
+      processingFee: processingFeeIncGst,
       stampDuty,
-      totalDeductions,
+      totalCharges,
       offerType: "initial",
     };
     if (onContinueWithOffer) {
@@ -92,7 +90,7 @@ export default function Stage6InitialOffer({
         <div className="space-y-1.5">
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className="text-xs font-black uppercase tracking-wider text-[#004499]">
-              Stage {stageNumber || 3} • Final Offer Assessment
+              Stage {stageNumber || 5} • Final Offer Assessment
             </span>
             <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-emerald-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
               <CheckCircle2 className="h-3 w-3 text-emerald-600 shrink-0" />
@@ -155,7 +153,7 @@ export default function Stage6InitialOffer({
                   {customerData.courseName || "MS in Data Science & Artificial Intelligence"}
                 </p>
                 <p className="text-xs text-slate-500 leading-tight">
-                  {customerData.institutionName || "Indian Institute of Science (IISc) / BITS Pilani"}
+                  {customerData.employerName ? `${customerData.employerName} • ` : ""}{customerData.highestEducation || "Graduate / Bachelor's Degree"}
                 </p>
               </div>
             </div>
@@ -228,7 +226,7 @@ export default function Stage6InitialOffer({
             </div>
             <div className="pt-2 border-t border-emerald-200/80">
               <p className="text-[11px] text-emerald-700 font-mono font-medium leading-relaxed">
-                Formula: {formatCurrency(loanAmount)} (Sanction) − {formatCurrency(totalDeductions)} (Deductions)
+                Full Applied Loan Amount: {formatCurrency(loanAmount)} (No deductions from disbursal)
               </p>
             </div>
           </div>
@@ -277,43 +275,27 @@ export default function Stage6InitialOffer({
 
             {/* Unique Itemized Charges List */}
             <div className="space-y-2.5">
-              {/* Item 1: Processing Fee */}
+              {/* Item 1: Processing Fees (inc. GST) */}
               <div className="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-xl border border-slate-100">
                 <div className="flex items-center gap-2.5">
                   <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px] flex items-center justify-center shrink-0">
                     1
                   </span>
                   <div>
-                    <p className="text-xs font-bold text-slate-800">Processing Fee (1.0%)</p>
-                    <p className="text-[10px] text-slate-400">1.0% of {formatCurrency(loanAmount)}</p>
+                    <p className="text-xs font-bold text-slate-800">Processing Fees (inc. GST)</p>
+                    <p className="text-[10px] text-slate-400">1.0% + 18% GST included</p>
                   </div>
                 </div>
                 <span className="font-mono font-bold text-slate-900 text-sm">
-                  {formatCurrency(processingFee)}
+                  {formatCurrency(processingFeeIncGst)}
                 </span>
               </div>
 
-              {/* Item 2: GST on Processing Fee */}
-              <div className="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-xl border border-slate-100">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-6 h-6 rounded-full bg-blue-100 text-[#004499] font-bold text-[10px] flex items-center justify-center shrink-0">
-                    2
-                  </span>
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">GST (18% on PF)</p>
-                    <p className="text-[10px] text-slate-400">Statutory GST on processing fee</p>
-                  </div>
-                </div>
-                <span className="font-mono font-bold text-slate-900 text-sm">
-                  {formatCurrency(gst)}
-                </span>
-              </div>
-
-              {/* Item 3: Stamp Duty */}
+              {/* Item 2: Stamp Duty */}
               <div className="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-xl border border-slate-100">
                 <div className="flex items-center gap-2.5">
                   <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 font-bold text-[10px] flex items-center justify-center shrink-0">
-                    3
+                    2
                   </span>
                   <div>
                     <p className="text-xs font-bold text-slate-800">STAMP DUTY</p>
@@ -324,34 +306,15 @@ export default function Stage6InitialOffer({
                   {formatCurrency(stampDuty)}
                 </span>
               </div>
-
-              {/* Item 4: Doc / Legal Fee */}
-              <div className="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-xl border border-slate-100">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-700 font-bold text-[10px] flex items-center justify-center shrink-0">
-                    4
-                  </span>
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">DOC / LEGAL FEE</p>
-                    <p className="text-[10px] text-slate-400">Zero additional paperwork charges</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-emerald-100 text-emerald-800 text-[9px] px-2 py-0 font-bold">
-                    Waived
-                  </Badge>
-                  <span className="font-mono font-bold text-emerald-700 text-sm">₹0</span>
-                </div>
-              </div>
             </div>
 
-            {/* Total Deductions Highlight Bar */}
+            {/* Total Charges Highlight Bar */}
             <div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-100 rounded-xl border border-slate-200">
               <span className="font-bold text-xs text-slate-700 uppercase tracking-wider">
-                Total Applicable Deductions
+                Total Applicable Charges
               </span>
               <span className="font-mono font-black text-slate-900 text-base">
-                {formatCurrency(totalDeductions)}
+                {formatCurrency(totalCharges)}
               </span>
             </div>
 
@@ -363,7 +326,7 @@ export default function Stage6InitialOffer({
                     Total Loan Amount Including Charges
                   </span>
                   <p className="text-[11px] text-blue-900 font-medium">
-                    Principal + Processing Fee + Statutory GST + Stamp Duty
+                    Principal + Processing Fee (inc. GST) + Stamp Duty
                   </p>
                 </div>
                 <span className="text-xl font-black text-[#004499] font-mono">
@@ -371,7 +334,7 @@ export default function Stage6InitialOffer({
                 </span>
               </div>
               <p className="text-[10px] text-blue-700 font-mono pt-1 border-t border-blue-200/70">
-                Formula: {formatCurrency(loanAmount)} + {formatCurrency(processingFee)} (PF) + {formatCurrency(gst)} (GST) + {formatCurrency(stampDuty)} (Stamp Duty)
+                Formula: {formatCurrency(loanAmount)} (Loan) + {formatCurrency(processingFeeIncGst)} (PF inc. GST) + {formatCurrency(stampDuty)} (Stamp Duty)
               </p>
             </div>
           </div>
