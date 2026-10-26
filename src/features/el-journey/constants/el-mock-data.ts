@@ -2,12 +2,16 @@ export interface CoApplicantDetails {
   fullName: string;
   fatherName: string;
   gender: "Male" | "Female" | "Other" | "";
+  mobile?: string;
+  isMobileVerified?: boolean;
+  financialDecision?: "yes" | "no";
   relationWithApplicant: "Father" | "Mother" | "Spouse" | "Guardian" | "Other" | "";
   maritalStatus: "Single" | "Married" | "Divorced" | "Widowed" | "";
   pan: string;
   dob: string; // YYYY-MM-DD
   email: string;
   highestEducation: string;
+  employmentType?: "Salaried" | "Self-employed" | "";
   employerName: string;
   salary: number;
   sameAsMainApplicantAddress: boolean;
@@ -45,6 +49,7 @@ export interface DemoProfile {
   loanAmount: number;
   loanTenure: number;
   employmentType: "Salaried" | "Self-employed";
+  financialDecision?: "yes" | "no";
   isCoApplicantRequired?: boolean;
   coApplicant?: CoApplicantDetails;
 }
@@ -77,12 +82,16 @@ export const MOCK_CO_APPLICANT_PROFILE: CoApplicantDetails = {
   fullName: "Aarav Sharma",
   fatherName: "Ramesh Sharma",
   gender: "Male",
+  mobile: "9811223344",
+  isMobileVerified: true,
+  financialDecision: "yes",
   relationWithApplicant: "Father",
   maritalStatus: "Married",
   pan: "ABCPS1234F",
   dob: "1978-06-15",
   email: "aarav.sharma@example.com",
   highestEducation: "Graduate / Bachelor's Degree",
+  employmentType: "Salaried",
   employerName: "Tata Consultancy Services Ltd.",
   salary: 85000,
   sameAsMainApplicantAddress: false,
@@ -97,12 +106,16 @@ export const EMPTY_CO_APPLICANT_PROFILE: CoApplicantDetails = {
   fullName: "",
   fatherName: "",
   gender: "",
+  mobile: "",
+  isMobileVerified: false,
+  financialDecision: "no",
   relationWithApplicant: "",
   maritalStatus: "",
   pan: "",
   dob: "",
   email: "",
   highestEducation: "",
+  employmentType: "",
   employerName: "",
   salary: 0,
   sameAsMainApplicantAddress: false,
